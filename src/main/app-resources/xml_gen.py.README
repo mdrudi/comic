@@ -1,0 +1,26 @@
+
+esempi :
+
+
+
+
+
+python xml_gen.py 1987 1987 03 > application.xml_198703
+
+---> workflow per processare gen,feb,mar del 1987
+
+
+
+
+
+python xml_gen.py 1987 1988 05 > application.xml_198805
+
+---> workflow per processare da gen 1987 a maggio 1988
+
+
+
+
+
+python xml_gen.py 1987 1988 12 > application.xml_198812
+
+---> workflow per processare da gen 1987 a dicembre 1988
