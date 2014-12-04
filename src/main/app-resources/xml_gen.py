@@ -73,13 +73,13 @@ sPar(defaultParameters,'LonLat','',title="WorkingArea",abstract="default None", 
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
 #sPar(defaultParameters,'oat','')
-sPar(defaultParameters,'OutLayer','[0,10,50,100,500,1000,2000]',title="DepthLayers",abstract="default X",scope="runtime")
+sPar(defaultParameters,'OutLayer','[0,10,50,100,500,1000,2000]',title="DepthLayers",abstract="default [0,10,50,100,500,1000,2000]",scope="runtime")
 #sPar(defaultParameters,'oao','')
 #sPar(defaultParameters,'otc','')
 sPar(defaultParameters,'bm','True')
 #sPar(defaultParameters,'s','False')
 sPar(defaultParameters,'iClean','True')
-sPar(defaultParameters,'iKey','',title="Key",abstract="default None",scope="runtime")
+#sPar(defaultParameters,'iKey','',title="Key",abstract="default None",scope="runtime") # does not work properly : better if the input files are exactly what you want to process
 
 jobTemplate=ET.SubElement(jobTemplates,'jobTemplate')
 jobTemplate.set('id',"jt_t")
@@ -155,7 +155,7 @@ property.tail='\n'
 
 workflow=ET.SubElement(application,'workflow')
 workflow.set('id','wp6_wf_id')
-workflow.set('title','WP6 workflow'+startYear+' 01'+endYear+' '+endMonth)
+workflow.set('title','WP6 workflow '+str(startYear)+' 01 '+str(endYear)+' '+str(endMonth))
 workflow.set('abstract','Toolbox parameters')
 workflow.text='\n'
 workflow.tail='\n'
