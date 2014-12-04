@@ -95,7 +95,7 @@ def bm_close() :
    #global t_compute
    #global t_write
    global bminfo
-   tot=t_init+t_read+t_compute+t_write+bminfo['t_bm']+bminfo['t_wrap']
+   tot=bminfo['t_init']+bminfo['t_read']+bminfo['t_compute']+bminfo['t_write']+bminfo['t_bm']+bminfo['t_wrap']
    tot100=tot/100
 
    print "\nbm---------------"
