@@ -35,6 +35,11 @@ def sNodeMonth(workflow,y,m) :
 
 
 import xml.etree.ElementTree as ET
+import sys
+startYear=int(sys.argv[1])
+endYear=int(sys.argv[2])
+endMonth=sys.argv[3]
+
 
 application=ET.Element('application')
 application.set('xmlns:xsi',"http://www.w3.org/2001/XMLSchema-instance")
@@ -150,7 +155,7 @@ property.tail='\n'
 
 workflow=ET.SubElement(application,'workflow')
 workflow.set('id','wp6_wf_id')
-workflow.set('title','WP6 workflow')
+workflow.set('title','WP6 workflow'+startYear+' 01'+endYear+' '+endMonth)
 workflow.set('abstract','Toolbox parameters')
 workflow.text='\n'
 workflow.tail='\n'
@@ -180,10 +185,6 @@ parameters.text='\n'
 parameters.tail='\n'
 
 
-import sys
-startYear=int(sys.argv[1])
-endYear=int(sys.argv[2])
-endMonth=sys.argv[3]
 myRange=range(startYear,endYear+1)
 
 for i in myRange :

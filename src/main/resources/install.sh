@@ -10,6 +10,6 @@ mkdir jt_vto
 cp -a $ResourcesDir/../python/sp/* ./jt_vto
 touch inputfiles
 cd jt_vto
-ln -s sp-ciop.py run.sh
+ln -s sp-ciop.py run.py
 
 echo Remind : before submission to be generated application.xml and inputfiles
