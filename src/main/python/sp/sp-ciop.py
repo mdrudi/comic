@@ -162,8 +162,9 @@ def main():
 
 #   if sp_glob.verbose : print 'Out[0,0,88,0]=',Out.COSM[0,0,88,0], type(Out.COSM[0,0,88,0]), repr(Out.COSM[0,0,88,0]),Out.COSM[:,:,88,0]
 
-   if opt['bm'] : sp_bm.bm_close()
-
+   if opt['bm'] : 
+      sp_bm.bm_close()
+      ciop.publish(os.environ['TMPDIR']+'/bm.txt')
 
 
 if __name__ == "__main__":
