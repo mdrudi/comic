@@ -58,6 +58,7 @@ def main():
    opt['Var']=CheckNone(ciop.getparam('Var'))    #MANDATORY
    try : opt['LonLat']=CheckNoneOrRange(ciop.getparam('LonLat'))
    except : opt['LonLat']=None
+   print "WARNING 16 : also in case of wrong format for input parameters the value will be None and computation continues"
    try : opt['iClean']=ciop.getparam('iClean')
    except : opt['iClean']=False
    opt['OutFile']=CheckNone(ciop.getparam('OutFile'))   #MANDATORY
