@@ -1,0 +1,6 @@
+QUICK START - IN SANDBOX
+
+ciop-simjob -n
+ciop-simjob node_v
+ls /share/tmp/sandbox/wp6_wf_id/node_v/data/ -l
+ciop-simwf

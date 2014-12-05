@@ -1,33 +1,23 @@
-cd `dirname $0`
-cp -p ../sp/* application/processor_tpy/
-cp -a application/* /application/
-ciop-simjob -n
-ciop-simjob node_processor_s
-ls /share/tmp/sandbox/wp6_wf_id/node_processor_s/data/ -l
-ciop-simjob node_processor_t
-ciop-simjob node_processor_tpy
+TEST CASE
 
+sp.py -f list -p par.dat < inputfiles
 
+sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,50,100,500,1000,2000]' --bm
 
-./sp.py -f list -p ppp.dat < appo.txt
-../sp/sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,50,100,500,1000,2000]' --bm
-../sp/sp.py --ifile list -p ../sp/ppp.dat < ../sp/appo.txt
-../sp/sp.py --ifile list -p ../sp/ppp.dat --bm --otime=xxx < ../sp/appo.txt
+sp.py --ifile list -p par.dat < inputfiles
 
-../sp/sp.py --ifile list -p ../sp/ppp.dat --bm < ../sp/appo.txt
-../sp/sp.py --ifile list --var=votemper --bm --otime < 2.txt
+sp.py --ifile list -p par.dat --bm < inputfiles
 
-../sp/sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm < ../sp/appo.txt
+sp.py --ifile list --ifield=votemper --bm --oat < inputfiles
 
-../sp/sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm --oat < ../sp/appo.txt
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm < inputfiles
 
-../sp/sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat --bm < ../sp/appo.txt
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm --oat < inputfiles
 
-../sp/sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,300]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]'
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat --bm < inputfiles
 
-../sp/sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]' -v
+sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,300]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]'
 
-../sp/sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --otc < ../sp/appo.txt
+sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]' -v
 
-#da sviluppare :
-#verificare output per timeseries
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --otc < inputfiles
