@@ -1,0 +1,120 @@
+This program will read all the bm.txt files from the standard input, calculate the cumulative value for each parameters, print the result on the standard output, and save it in a new file bm.txt
+
+SYNTAX
+
+find ../../../[path]/../../ -iname bm.txt | [path]/sp_bm.py
+
+
+EXAMPLE
+
+[melodies-wp6@sb-10-15-27-13 sp]$ find ../../../../../toolbox-test/ -iname bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198702/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198708/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198709/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198706/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198701/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198711/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198705/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198704/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_o/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198710/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198703/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198707/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198712/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198702/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198708/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198709/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198706/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198701/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198711/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198705/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198704/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_o/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198710/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198703/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_v/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198707/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198712/data/bm.txt
+
+
+[melodies-wp6@sb-10-15-27-13 sp]$ echo ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt | ./sp_bm.py
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt
+
+bm---------------
+
+Input Data
+|  byte in memory  :  7107476376
+|  # grid point    :  1776869094
+`  # sea point     :  506354394
+
+Output Data
+|  byte in memory  :  1496310816
+|  # grid point    :  187038852
+`  # sea point     :  59180576
+
+Max Memory         :  243015680
+
+Init         : (ms) 19865 - 1 %
+i/o read     : (ms) 102390 - 8 %
+computation  : (ms) 185272 - 14 %
+i/o write    : (ms) 114120 - 9 %
+benchmarking : (ms) 66282 - 5 %
+wrap         : (ms) 850529 - 64 %
+tot          :  (s) 1338.458
+
+
+
+[melodies-wp6@sb-10-15-27-13 sp]$ find ../../../../../toolbox-test/ -iname bm.txt | ./sp_bm.py 
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198702/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198708/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198709/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198706/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198701/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198711/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198705/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198704/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_o/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198710/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198703/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198707/data/bm.txt
+../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198712/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198702/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198708/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198709/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198706/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198701/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198711/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198705/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198704/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_o/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198710/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198703/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_v/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198707/data/bm.txt
+../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198712/data/bm.txt
+
+bm---------------
+
+Input Data
+|  byte in memory  :  8677393920
+|  # grid point    :  2169348480
+`  # sea point     :  629791084
+
+Output Data
+|  byte in memory  :  1549241472
+|  # grid point    :  199835664
+`  # sea point     :  63202980
+
+Max Memory         :  3438768128
+
+Init         : (ms) 431222 - 11 %
+i/o read     : (ms) 152746 - 4 %
+computation  : (ms) 200898 - 5 %
+i/o write    : (ms) 136495 - 3 %
+benchmarking : (ms) 67789 - 2 %
+wrap         : (ms) 2959431 - 75 %
+tot          :  (s) 3948.581
+
+

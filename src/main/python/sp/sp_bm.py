@@ -1,25 +1,17 @@
+#!/usr/bin/python
+
 BM_INIT=1
 BM_READ=2
 BM_WRITE=3
 BM_COMPUTE=4
-#BM_ID=5
-#BM_OD=6
 BM_BM=7
 BM_WRAP=8
 t_last=0
-#t_init=0   REMOVE ASAP
-#t_read=0
-#t_compute=0
-#t_write=0
 bminfo=0
 
 def bm_setup() :
    import time
    global t_last
-   #global t_init   REMOVE ASAP
-   #global t_read
-   #global t_compute
-   #global t_write
    global bminfo
    t_last=time.time()
    t_init=0
@@ -36,8 +28,6 @@ def bm_update(type,data=None) :
    global BM_WRITE
    global BM_COMPUTE
    global BM_WRAP
-#   global BM_ID
-#   global BM_OD
    global bminfo
    global t_last
    mm=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -77,23 +67,9 @@ def bm_update(type,data=None) :
          bminfo['t_bm']+=delta
    t_last=t_new
 
-#   elif type == BM_ID :
-#      bminfo['in_byte']+=data.nbytes
-#      bminfo['in_point']+=data.size
-#      bminfo['in_spoint']+=data.count()
-#      bminfo['t_bm']+=delta
-#   elif type == BM_OD :
-#      bminfo['out_byte']+=data.nbytes
-#      bminfo['out_point']+=data.size
-#      bminfo['out_spoint']+=data.count()
-#      bminfo['t_bm']+=delta
 
 
 def bm_close() :
-   #global t_init
-   #global t_read
-   #global t_compute
-   #global t_write
    global bminfo
    tot=bminfo['t_init']+bminfo['t_read']+bminfo['t_compute']+bminfo['t_write']+bminfo['t_bm']+bminfo['t_wrap']
    tot100=tot/100
@@ -120,13 +96,26 @@ def bm_close() :
    print 'wrap         : (ms)',int(bminfo['t_wrap']),'-',int(round( bminfo['t_wrap'] /tot100)),'%'
    print 'tot          :  (s)',tot/1000
 
-   #bminfo['t_init']=t_init
-   #bminfo['t_read']=t_read
-   #bminfo['t_compute']=t_compute
-   #bminfo['t_write']=t_write
-
-   #print bminfo
    import json
    json.dump(bminfo,open('bm.txt','w'))
 
+
+
+def main() :
+   import sys
+   import json
+   global bminfo
+   bminfo=dict(t_init=0,t_read=0,t_compute=0,t_write=0,t_bm=0,t_wrap=0,in_byte=0,in_point=0,in_spoint=0,out_byte=0,out_point=0,out_spoint=0,p_max_mem=0)
+   a=sys.stdin.readline().replace("\r","").replace("\n","")
+   while a != '' :
+      print a
+      bminfotmp=json.load(open(a,'r'))
+      for fi in bminfo :
+         bminfo[fi]+=bminfotmp[fi]
+      a=sys.stdin.readline().replace("\r","").replace("\n","")
+   bm_close()
+
+
+if __name__ == "__main__":
+   main()
 
