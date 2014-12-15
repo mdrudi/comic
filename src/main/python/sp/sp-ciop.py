@@ -37,7 +37,7 @@ def GetInput(InputFileName) :
    return LocalInputFileName
 
 def PutOutput(output_name, par_metalink=False) :
-   ciop.publish(os.environ['TMPDIR']+'/'+output_name) , metalink=par_metalink)
+   ciop.publish(os.environ['TMPDIR']+'/'+output_name , metalink=par_metalink)
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
 opt=dict()
