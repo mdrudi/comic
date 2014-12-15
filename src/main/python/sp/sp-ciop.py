@@ -36,8 +36,8 @@ def GetInput(InputFileName) :
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
    return LocalInputFileName
 
-def PutOutput(output_name) :
-   ciop.publish(os.environ['TMPDIR']+'/'+output_name)  #, metalink=True)
+def PutOutput(output_name, par_metalink=False) :
+   ciop.publish(os.environ['TMPDIR']+'/'+output_name) , metalink=par_metalink)
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
 opt=dict()
@@ -137,7 +137,7 @@ def main():
          InputFileName=sp.GetLine(keyPattern)
       if one :
          output_name=my_sp.loop_close()
-         PutOutput(output_name)
+         PutOutput(output_name, metalink=True)
          sp.EchoOutputFile(output_name)
 
    elif Many2Many :
