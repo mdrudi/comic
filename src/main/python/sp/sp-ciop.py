@@ -137,7 +137,7 @@ def main():
          InputFileName=sp.GetLine(keyPattern)
       if one :
          output_name=my_sp.loop_close()
-         PutOutput(output_name, metalink=True)
+         PutOutput(output_name, par_metalink=True)
          sp.EchoOutputFile(output_name)
 
    elif Many2Many :
