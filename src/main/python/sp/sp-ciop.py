@@ -13,11 +13,6 @@ import sys
 sys.path.append('/usr/lib/ciop/python/')
 import cioppy as ciop
 
-#def GetLine() :
-#   a=sys.stdin.readline()
-#   if a == '' : return False
-#   return a.replace("\r","").replace("\n","")
-
 def CheckNone(text) :
    if ( text == 'None' ) or ( text == '' ) :
       return None
@@ -36,8 +31,10 @@ def GetInput(InputFileName) :
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
    return LocalInputFileName
 
-def PutOutput(output_name, par_metalink=False) :
-   ciop.publish(os.environ['TMPDIR']+'/'+output_name , metalink=par_metalink)
+def PutOutput(output_name, RemoveOutput=False, par_metalink=False) :
+   ciop.publish(os.environ['TMPDIR']+'/'+output_name )
+   if par_metalink : ciop.publish(os.environ['TMPDIR']+'/'+output_name , metalink=par_metalink)
+   if RemoveOutput : os.remove(output_name)
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
 opt=dict()
@@ -121,7 +118,6 @@ def main():
       keyPattern=None
 
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_INIT)
-   #if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
    my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
 
@@ -147,7 +143,7 @@ def main():
          sp.EchoInputFile(LocalInputFileName)
          output_name=my_sp.once(LocalInputFileName,OutFileNameIsPostfix=True)
          #os.remove(LocalInputFileName)
-         PutOutput(output_name)
+         PutOutput(output_name,RemoveOutput=opt['iClean'])
          sp.EchoOutputFile(output_name)
          InputFileName=sp.GetLine(keyPattern)
 
@@ -165,7 +161,9 @@ def main():
 
    if opt['bm'] : 
       sp_bm.bm_close()
-      ciop.publish(os.environ['TMPDIR']+'/bm.txt')
+      pathname=os.environ['TMPDIR']+'/bm.txt_'+os.environ['mapred_task_id']
+      os.rename('bm.txt',pathname)
+      ciop.publish(pathname)
 
 
 if __name__ == "__main__":
