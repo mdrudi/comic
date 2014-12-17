@@ -1,22 +1,23 @@
-This software is under development into the work package 
+# Framework 
+The **C**alculator f**O**r **M**arine **I**ndicators and **C**haracteristic - **COMIC** - is a software under development into the work package 
 [WP6 Assessmento of Good Environmental Status for the oceans and seas] (http://www.melodiesproject.eu/node/35), 
 in project [MELODIES - http://www.melodiesproject.eu] (http://www.melodiesproject.eu) . 
 
 **The MELODIES project - Maximizing the Exploitation of Linked Open Data In Enterprose and Science** : 
-Aims to demonstrate the business and scientific benefits of releasing data openly through real applications .
+this project aims to demonstrate the business and scientific benefits of releasing data openly through real applications .
 
-**WP6 Assessmento of Good Environmental Status for the oceans and seas** : a new services in development 
+**WP6 Assessment of Good Environmental Status for the oceans and seas** : a new services in development 
 within the MELODIES project, for the assessment of GES (Good Environmental Status) and support its achievement 
 by 2020 as defined in [Marine Strategy Framework Directive - DIRECTIVE 2008/56/EC OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL] (http://ec.europa.eu/environment/marine/eu-coast-and-marine-policy/marine-strategy-framework-directive/index_en.htm)
 
 
-# Interpolation Toolbox
+# COMIC
 
-Toolbox aims to compute GES characteristics and indicators. 
+This software aims to compute GES characteristics and indicators from multi-year Earth data, available as [open data](https://open-data.europa.eu/en/data) 
 
-The initial design took into consideration issues related to the huge volume of available data for input, 
-hence the performance requirements in such kind of application, and the efficiency in computation and data access, 
-due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
+The initial design took into consideration issues related to the huge volume of available inputs, 
+hence the performance requirements, due to such kind of application, 
+and the efficiency in computation and data access, due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
 The development is based as much as possible on criteria for software and technology reusability.   
 
 
@@ -66,10 +67,18 @@ Following the list of prerequisites for this software execution :
 .
 \-- src
     \-- main
-        |-- app-resources   -> additional software required in the execution environment
+        |-- app-resources   -> additional software required in project environment
         |-- doc             -> some documentation
         |-- python
         |   \-- sp          -> source code of the software
-        \-- resources       -> procedure to deploy the software in the execution environment
+        \-- resources       -> procedure to deploy in project environment
 ```
 
+The executable program is 
+```
+src/main/python/sp/sp.py
+```
+some execution examples are in 
+```
+src/main/python/sp/sp.py.README
+```

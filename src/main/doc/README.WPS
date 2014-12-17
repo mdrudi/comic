@@ -1,8 +1,0 @@
-QUICK START - CALL FROM WPS
-
-Example 1 :
-Parameter= votemper
-WorkingArea= [  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]
-DepthLayers= [0,10,50,100,500,1000,2000]
-
-
