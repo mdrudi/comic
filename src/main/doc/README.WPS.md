@@ -2,13 +2,16 @@
 
 ## Test Case A
 
+```
 python xml_gen.py 1987 1987 12 > application.xml
 Parameter= votemper
 WorkingArea= None
 DepthLayers= [0,10,50,100,500,1000,2000]
+```
 
 ### result 2
 
+```
 Commit : deploy1/3ead231 improvement to gather benchmarking info
 
 Output in /share/tmp/wps/wp6_wf_id/0000036-141201235331088-oozie-oozi-W
@@ -35,9 +38,11 @@ i/o write    : (ms) 248363 - 7 %
 benchmarking : (ms) 72787 - 2 %
 wrap         : (ms) 2414485 - 68 %
 tot          :  (s) 3555.536
+```
 
 ### result 1
 
+```
 Commit : deploy1/df84e60 correction in generation of applicatio.xml to filter bm.txt
 
 Output in /share/tmp/wps/wp6_wf_id/0000016-141201235331088-oozie-oozi-W
@@ -64,18 +69,20 @@ i/o write    : (ms) 123627 - 5 %
 benchmarking : (ms) 67700 - 3 %
 wrap         : (ms) 1581392 - 68 %
 tot          :  (s) 2332.578
-
+```
 
 ## Test Case B
 
+```
 python xml_gen.py 1987 1987 12 > application.xml
 Parameter= votemper
 WorkingArea= [  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]
 DepthLayers= [0,10,50,100,500,1000,2000]
-
+```
 
 ### result 2
 
+```
 Commit : deploy1/3ead231 improvement to gather benchmarking info
 
 Output in /share/tmp/wps/wp6_wf_id/0000035-141201235331088-oozie-oozi-W
@@ -102,9 +109,11 @@ i/o write    : (ms) 33148 - 1 %
 benchmarking : (ms) 340 - 0 %
 wrap         : (ms) 2435866 - 88 %
 tot          :  (s) 2770.551
+```
 
 ### result 1
 
+```
 Commit : deploy1/df84e60 correction in generation of applicatio.xml to filter bm.txt
 
 Output in /share/tmp/wps/wp6_wf_id/0000015-141201235331088-oozie-oozi-W
@@ -131,4 +140,4 @@ i/o write    : (ms) 12868 - 1 %
 benchmarking : (ms) 89 - 0 %
 wrap         : (ms) 1378039 - 85 %
 tot          :  (s) 1616.003
-
+```

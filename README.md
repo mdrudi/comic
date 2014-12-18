@@ -1,5 +1,5 @@
-# Framework 
-The **C**alculator f**O**r **M**arine **I**ndicators and **C**haracteristic - **COMIC** - is a software under development into the work package 
+# Intro 
+The **C**alculator f**O**r **M**arine **I**ndicators and **C**haracteristics - **COMIC** - is a software under development into the work package 
 [WP6 Assessmento of Good Environmental Status for the oceans and seas] (http://www.melodiesproject.eu/node/35), 
 in project [MELODIES - http://www.melodiesproject.eu] (http://www.melodiesproject.eu) . 
 
@@ -11,19 +11,35 @@ within the MELODIES project, for the assessment of GES (Good Environmental Statu
 by 2020 as defined in [Marine Strategy Framework Directive - DIRECTIVE 2008/56/EC OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL] (http://ec.europa.eu/environment/marine/eu-coast-and-marine-policy/marine-strategy-framework-directive/index_en.htm)
 
 
+
 # COMIC
 
-This software aims to compute GES characteristics and indicators from multi-year Earth data, available as [open data](https://open-data.europa.eu/en/data) 
+This software aims to compute *GES characteristics and indicators* from *multi-year Earth Observation and Model datasets*, available as [open data](https://open-data.europa.eu/en/data) 
 
 The initial design took into consideration issues related to the huge volume of available inputs, 
-hence the performance requirements, due to such kind of application, 
+hence the performance requirements, due to such kind of applications, 
 and the efficiency in computation and data access, due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
-The development is based as much as possible on criteria for software and technology reusability.   
+The development is based as much as possible on criteria for software and technology **reusability**.   
 
 
-## Stakeholders
+## Content of repository
 
-...
+The executable program is :
+```
+src/main/python/sp/sp.py
+```
+
+Repository content :
+```
+.
+\-- src
+    \-- main
+        |-- app-resources   -> additional software required in project environment
+        |-- doc             -> some documentation
+        |-- python
+        |   \-- sp          -> source code of the software
+        \-- resources       -> procedure to deploy in project environment
+```
 
 
 ## Features
@@ -51,7 +67,7 @@ Technical :
 
 ## Development environment
 
-Following the list of prerequisites for this software execution :
+List of prerequisites for this software execution :
 
 * NetCDF library - test done with version 4.1.1
 * HDF5 library - test done with version 1.8.5
@@ -60,25 +76,26 @@ Following the list of prerequisites for this software execution :
 * netcdf4-python - test done with version 1.0.2
 
 
-## Content of repository
+## Quick Usage Examples
 
+The following examples are only meant to show in short some simple usage of this program.
 
+To compute the map of mean _votemper_ field at depth layers [0,20] , [20,75] and [75,150] (parameter --oav) in a given lon/lat box (parameter --ilonlat). The input field is available in one nc file _/path/filename.nc_ at any depth layers.
 ```
-.
-\-- src
-    \-- main
-        |-- app-resources   -> additional software required in project environment
-        |-- doc             -> some documentation
-        |-- python
-        |   \-- sp          -> source code of the software
-        \-- resources       -> procedure to deploy in project environment
+sp.py --ifile /path/filename.nc --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,20,75,150]'
 ```
 
-The executable program is 
+To compute the maps of mean _votemper_ field at depth layers [0,20] , [20,75] and [75,150] (parameter --oav) in a given lon/lat box (parameter --ilonlat). The input fields are available in many nc files which are listed in  _/path/listinputfiles.txt_ . The program will perform the same computation on each input file and output one output file for each input file.
 ```
-src/main/python/sp/sp.py
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,20,75,150]' < /path/listinputfiles.txt
 ```
-some execution examples are in 
+
+To compute the map of mean _votemper_ field over the time. The input fields are available in many nc files which are listed in  _/path/listinputfiles.txt_ and must cover a continuous temporal range.
 ```
-src/main/python/sp/sp.py.README
+sp.py --ifile list --ifield=votemper --oat < /path/listinputfiles.txt
+```
+
+To compute the time-series (parameter --otc) of mean value over the whole horizontal domain (parameter --oao) of _votemper_ field. The input fields are available in many nc files which are listed in  _/path/listinputfiles.txt_ and must cover a continuous temporal range. 
+```
+sp.py --ifile list --ifield=votemper --oao --otc < /path/listinputfiles.txt
 ```
