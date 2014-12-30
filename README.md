@@ -17,8 +17,8 @@ by 2020 as defined in [Marine Strategy Framework Directive - DIRECTIVE 2008/56/E
 This software aims to compute *GES characteristics and indicators* from *multi-year Earth Observation and Model datasets*, available as [open data](https://open-data.europa.eu/en/data) 
 
 The initial design took into consideration issues related to the huge volume of available inputs, 
-hence the performance requirements, due to such kind of applications, 
-and the efficiency in computation and data access, due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
+hence the **performance requirements**, due to such kind of applications, 
+and the **efficiency** in computation and data access, due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
 The development is based as much as possible on criteria for software and technology **reusability**.   
 
 
@@ -80,12 +80,12 @@ List of prerequisites for this software execution :
 
 The following examples are only meant to show in short some simple usage of this program.
 
-To compute the map of mean _votemper_ field at depth layers [0,20] , [20,75] and [75,150] (parameter --oav) in a given lon/lat box (parameter --ilonlat). The input field is available in one nc file _/path/filename.nc_ at any depth layers.
+To compute the map of mean _votemper_ field at depth layers (parameter --oav) [0,20] , [20,75] and [75,150] in a given lon/lat box (parameter --ilonlat). The input field is available in one nc file _/path/filename.nc_ at any depth layers.
 ```
 sp.py --ifile /path/filename.nc --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,20,75,150]'
 ```
 
-To compute the maps of mean _votemper_ field at depth layers [0,20] , [20,75] and [75,150] (parameter --oav) in a given lon/lat box (parameter --ilonlat). The input fields are available in many nc files which are listed in  _/path/listinputfiles.txt_ . The program will perform the same computation on each input file and output one output file for each input file.
+To compute the maps of mean _votemper_ field at depth layers (parameter --oav) [0,20] , [20,75] and [75,150] in a given lon/lat box (parameter --ilonlat). The input fields are available in many nc files which are listed in  _/path/listinputfiles.txt_ . The program will perform the same computation on each input file and output one output file for each input file.
 ```
 sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] , [[12.9,13.8],[44.3,45]] ]' --oav='[0,20,75,150]' < /path/listinputfiles.txt
 ```

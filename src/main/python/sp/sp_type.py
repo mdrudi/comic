@@ -1,11 +1,125 @@
 #!/usr/bin/python
+
 import numpy
+import sp_glob 
+
+
+def FindLowerTop(LayerIn,LayerOutLower,LayerOutTop) :
+   i=0
+   while True :
+      if LayerIn[i] <= LayerOutLower and LayerOutLower < LayerIn[i+1] :
+         break
+      i=i+1
+   Lower=i
+   while True :
+      if LayerIn[i] < LayerOutTop and LayerOutTop <= LayerIn[i+1] :
+         break
+      i=i+1
+   Top=i
+   return (Lower,Top)
+
+
+def FindWeight(Lower,Top,LayerIn,LayerOutLower,LayerOutTop) :
+   import numpy
+   internalType=numpy.float64
+   Weight=numpy.empty([Top-Lower+1], dtype=internalType)
+   #print "lolt",LayerOutLower,LayerOutTop
+   #print "top",Top,"lower",Lower
+   #print LayerIn
+   if Lower != Top :
+      Weight[0]=LayerIn[1]-LayerOutLower
+      Weight[Top-Lower]=LayerOutTop-LayerIn[Top-Lower]
+   else :
+      Weight[0]=LayerOutTop-LayerOutLower
+   for i in range(1,Top-Lower) :
+      #print Top-Lower,i,LayerIn[i+1],LayerIn[i],Weight.size
+      #Weight[i-Lower]=LayerIn[i+1]-LayerIn[i]
+      Weight[i]=LayerIn[i+1]-LayerIn[i]
+   return Weight
+
+
+def ProcessorS( FieldIn , LayerIn , LayerOut ) :
+   import numpy
+   print "BUG 1 : not considering partial step yet"
+   internalType=numpy.float64 #FieldIn.dtype
+   #internalType=FieldIn.dtype
+   if sp_glob.verbose : 
+      print '\nProcessorS'
+      print 'FieldIn' #,FieldIn
+      print 'LayerIn',LayerIn.size,LayerIn
+      print 'LayerOut',LayerOut
+   nLayer=len(LayerOut)-1    # number of layers in output
+   #print FieldIn.shape[0]
+   tmpOut=numpy.zeros( (FieldIn.shape[0],nLayer,FieldIn.shape[2], FieldIn.shape[3]), dtype=internalType )
+   print 'WARNING 9 : not clear whether nedded the following FieldIn[FieldIn.mask]=0'
+   #FieldIn[FieldIn.mask]=0
+   #print FieldIn.fill_value   WARNING : forse e' meglio duplicare invece di modificare l'input....
+
+   for iLayer in range(nLayer) :
+      if sp_glob.verbose : print 'processing layer' , iLayer #, LayerOut[iLayer],LayerOut[iLayer+1],LayerIn
+
+      (Lower,Top)=FindLowerTop(LayerIn,LayerOut[iLayer],LayerOut[iLayer+1])
+      if sp_glob.verbose : print 'Lower',Lower,'Top',Top
+
+      Weight=FindWeight(Lower,Top,LayerIn[Lower:Top+1],LayerOut[iLayer],LayerOut[iLayer+1])
+      if sp_glob.verbose : print 'Weight size',Weight.size,'Weight ', Weight
+
+#      W3D=numpy.ma.empty_like(FieldIn[:,Lower:Top+1,:,:])
+#      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
+#      W3D.harden_mask()
+
+      #W3D=numpy.ones_like(tmpOut[:,0,:,:])*Weight[0]
+      W3D=numpy.ma.empty_like(FieldIn[:,Lower:Top+1,:,:])
+      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
+      W3D=W3D.copy()
+      #W3D.harden_mask()   #causa errori nel broadcasting
+      #print 'W3D',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count()
+      for i in range(W3D.shape[1]) :
+         W3D[:,i,:,:]=Weight[i]
+      #for i in range(Lower+1,Top+1) :
+      #   W3D=numpy.concatenate( (W3D,numpy.ones_like(tmpOut[:,0,:,:])*Weight[i-Lower]) )
+      #print 'W3D',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count(),W3D.min(),W3D.max() #,W3D
+      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
+
+      Sum=numpy.sum(W3D,axis=1) 
+      #print 'SUM',type(Sum),Sum.shape,Sum.min(),Sum.max(),W3D[:,0,:,:].shape
+      for i in range(W3D.shape[1]) :
+         W3D[:,i,:,:]/=Sum[:,:,:]
+      #print W3D[:,i,:,:].shape, Sum[:,:,:].shape
+      #print 'W3D2',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count(),W3D.min(),W3D.max() #,W3D
+
+      if sp_glob.verbose : print "Weight total", numpy.sum(Weight),'=',LayerOut[iLayer+1]-LayerOut[iLayer]
+      Weight/=(LayerOut[iLayer+1]-LayerOut[iLayer])
+      if sp_glob.verbose : print "Weight normalized", Weight
+#MODALITA' CALCOLO 2
+#      WWW=numpy.ones_like(tmpOut[:,0,:,:])*Weight[0]
+      #print WWW
+#      for i in range(Lower+1,Top+1) :
+#         WWW=numpy.concatenate( (WWW,numpy.ones_like(tmpOut[:,0,:,:])*Weight[i-Lower]) )
+         #WWW.insert(
+      #print 'XYT',type(WWW),WWW.shape,type(FieldIn),FieldIn[:,Lower:Top+1,:,:].min(),FieldIn[:,Lower:Top+1,:,:].max()
+      #print FieldIn[:,Lower:Top+1,:,:].shape
+#      tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*WWW,axis=1)
+      tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*W3D,axis=1)
+      if sp_glob.verbose : print 'ABC1 min,max', tmpOut[:,iLayer,:,:].min(),tmpOut[:,iLayer,:,:].max()
+      #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,88,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,88,0]),FieldIn[0,Lower:Top+1,88,0],Weight[:]
+      #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,0,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,0,0]),FieldIn[0,Lower:Top+1,0,0],Weight[:]
+#END 2
+      #Rif sp_glob.verbose : print 'tmpOut[0,iLayer,88,0]',repr(tmpOut[0,iLayer,88,0])
+      #Rif sp_glob.verbose : print 'tmpOut[0,iLayer,0,0]',repr(tmpOut[0,iLayer,0,0])
+
+   #tmpOut=numpy.ma.masked_equal(tmpOut,0)
+   tmpOut=numpy.ma.array(tmpOut,mask=(tmpOut==0))
+   if sp_glob.verbose : print 'ABC2 min,max', tmpOut[:,:,:,:].min(),tmpOut[:,:,:,:].max()
+   return tmpOut
+   
 
 #http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
 def find_nearest(array,value):
     idx = (numpy.abs(array-value)).argmin()
     #return array[idx]
     return idx
+
 
 def FindIndex (a,Min,Max):
    #mapCondition = ((Min<=a) * (a<=Max))
@@ -185,122 +299,6 @@ class Characteristic :
       self.tCounter=1
       #print self.TimeCells
 
-
-
-
-import sp_glob 
-
-#verbose=False
-
-def FindLowerTop(LayerIn,LayerOutLower,LayerOutTop) :
-   i=0
-   while True :
-      if LayerIn[i] <= LayerOutLower and LayerOutLower < LayerIn[i+1] :
-         break
-      i=i+1
-   Lower=i
-   while True :
-      if LayerIn[i] < LayerOutTop and LayerOutTop <= LayerIn[i+1] :
-         break
-      i=i+1
-   Top=i
-   return (Lower,Top)
-
-def FindWeight(Lower,Top,LayerIn,LayerOutLower,LayerOutTop) :
-   import numpy
-   internalType=numpy.float64
-   Weight=numpy.empty([Top-Lower+1], dtype=internalType)
-   #print "lolt",LayerOutLower,LayerOutTop
-   #print "top",Top,"lower",Lower
-   #print LayerIn
-   if Lower != Top :
-      Weight[0]=LayerIn[1]-LayerOutLower
-      Weight[Top-Lower]=LayerOutTop-LayerIn[Top-Lower]
-   else :
-      Weight[0]=LayerOutTop-LayerOutLower
-   for i in range(1,Top-Lower) :
-      #print Top-Lower,i,LayerIn[i+1],LayerIn[i],Weight.size
-      #Weight[i-Lower]=LayerIn[i+1]-LayerIn[i]
-      Weight[i]=LayerIn[i+1]-LayerIn[i]
-   return Weight
-
-
-
-def ProcessorS( FieldIn , LayerIn , LayerOut ) :
-   import numpy
-   #global verbose
-   print "BUG 1 : not considering partial step yet"
-   internalType=numpy.float64 #FieldIn.dtype
-   #internalType=FieldIn.dtype
-   if sp_glob.verbose : 
-      print '\nProcessorS'
-      print 'FieldIn' #,FieldIn
-      print 'LayerIn',LayerIn.size,LayerIn
-      print 'LayerOut',LayerOut
-   nLayer=len(LayerOut)-1    # number of layers in output
-   #print FieldIn.shape[0]
-   tmpOut=numpy.zeros( (FieldIn.shape[0],nLayer,FieldIn.shape[2], FieldIn.shape[3]), dtype=internalType )
-   print 'WARNING 9 : not clear whether nedded the following FieldIn[FieldIn.mask]=0'
-   #FieldIn[FieldIn.mask]=0
-   #print FieldIn.fill_value   WARNING : forse e' meglio duplicare invece di modificare l'input....
-
-   for iLayer in range(nLayer) :
-      if sp_glob.verbose : print 'processing layer' , iLayer #, LayerOut[iLayer],LayerOut[iLayer+1],LayerIn
-
-      (Lower,Top)=FindLowerTop(LayerIn,LayerOut[iLayer],LayerOut[iLayer+1])
-      if sp_glob.verbose : print 'Lower',Lower,'Top',Top
-
-      Weight=FindWeight(Lower,Top,LayerIn[Lower:Top+1],LayerOut[iLayer],LayerOut[iLayer+1])
-      if sp_glob.verbose : print 'Weight size',Weight.size,'Weight ', Weight
-
-#      W3D=numpy.ma.empty_like(FieldIn[:,Lower:Top+1,:,:])
-#      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
-#      W3D.harden_mask()
-
-      #W3D=numpy.ones_like(tmpOut[:,0,:,:])*Weight[0]
-      W3D=numpy.ma.empty_like(FieldIn[:,Lower:Top+1,:,:])
-      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
-      W3D=W3D.copy()
-      #W3D.harden_mask()   #causa errori nel broadcasting
-      #print 'W3D',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count()
-      for i in range(W3D.shape[1]) :
-         W3D[:,i,:,:]=Weight[i]
-      #for i in range(Lower+1,Top+1) :
-      #   W3D=numpy.concatenate( (W3D,numpy.ones_like(tmpOut[:,0,:,:])*Weight[i-Lower]) )
-      #print 'W3D',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count(),W3D.min(),W3D.max() #,W3D
-      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
-
-      Sum=numpy.sum(W3D,axis=1) 
-      #print 'SUM',type(Sum),Sum.shape,Sum.min(),Sum.max(),W3D[:,0,:,:].shape
-      for i in range(W3D.shape[1]) :
-         W3D[:,i,:,:]/=Sum[:,:,:]
-      #print W3D[:,i,:,:].shape, Sum[:,:,:].shape
-      #print 'W3D2',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count(),W3D.min(),W3D.max() #,W3D
-
-      if sp_glob.verbose : print "Weight total", numpy.sum(Weight),'=',LayerOut[iLayer+1]-LayerOut[iLayer]
-      Weight/=(LayerOut[iLayer+1]-LayerOut[iLayer])
-      if sp_glob.verbose : print "Weight normalized", Weight
-#MODALITA' CALCOLO 2
-#      WWW=numpy.ones_like(tmpOut[:,0,:,:])*Weight[0]
-      #print WWW
-#      for i in range(Lower+1,Top+1) :
-#         WWW=numpy.concatenate( (WWW,numpy.ones_like(tmpOut[:,0,:,:])*Weight[i-Lower]) )
-         #WWW.insert(
-      #print 'XYT',type(WWW),WWW.shape,type(FieldIn),FieldIn[:,Lower:Top+1,:,:].min(),FieldIn[:,Lower:Top+1,:,:].max()
-      #print FieldIn[:,Lower:Top+1,:,:].shape
-#      tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*WWW,axis=1)
-      tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*W3D,axis=1)
-      if sp_glob.verbose : print 'ABC1 min,max', tmpOut[:,iLayer,:,:].min(),tmpOut[:,iLayer,:,:].max()
-      #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,88,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,88,0]),FieldIn[0,Lower:Top+1,88,0],Weight[:]
-      #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,0,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,0,0]),FieldIn[0,Lower:Top+1,0,0],Weight[:]
-#END 2
-      #Rif sp_glob.verbose : print 'tmpOut[0,iLayer,88,0]',repr(tmpOut[0,iLayer,88,0])
-      #Rif sp_glob.verbose : print 'tmpOut[0,iLayer,0,0]',repr(tmpOut[0,iLayer,0,0])
-
-   #tmpOut=numpy.ma.masked_equal(tmpOut,0)
-   tmpOut=numpy.ma.array(tmpOut,mask=(tmpOut==0))
-   if sp_glob.verbose : print 'ABC2 min,max', tmpOut[:,:,:,:].min(),tmpOut[:,:,:,:].max()
-   return tmpOut
 
 
 

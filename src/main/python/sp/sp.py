@@ -12,6 +12,41 @@ sp_glob.verbose=False
 # input thickness      : 2.94 3.28 3.44 3.78
 
 
+
+##### PUBLIC FUNCTIONALITIES : START
+
+def ParseRange ( opt ) :
+   import numpy
+   import json
+   #return numpy.array(map(float,opt.replace(" ","").replace("[","").replace("]","").split(",")))
+   return numpy.array(json.loads(opt))
+
+def GetLine(keyPattern=None) :
+   import sys
+   import re
+   c=10
+   #a=sys.stdin.readline()
+   #if a == '' : return False
+   #return a.replace("\r","").replace("\n","")
+   a=sys.stdin.readline().replace("\r","").replace("\n","")
+   while a != '' :
+      good=False
+      if keyPattern is None : good=True
+      elif re.search(keyPattern,a) is not None : good=True
+      if good : return a
+      a=sys.stdin.readline().replace("\r","").replace("\n","")
+   return False
+
+def EchoInputFile(text) :
+   print 'Input File  :',text
+
+def EchoOutputFile(text) :
+   print 'Output File :',text
+
+def NoneOrList(ar) :
+   if ar is None : return None
+   return ar.tolist()
+
 class sp :
    def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,RemoveInput=False) :
 
@@ -145,19 +180,20 @@ class sp :
 
 
 
+##### PUBLIC FUNCTIONALITIES : END
 
 
-#############   COMMAND LINE FRONT END   
 
-def ParseRange ( opt ) :
-   import numpy
-   import json
-   #return numpy.array(map(float,opt.replace(" ","").replace("[","").replace("]","").split(",")))
-   return numpy.array(json.loads(opt))
+
+
+
+
+##### LOCAL FUNCTIONALITIES : START
 
 #http://stackoverflow.com/questions/301134/dynamic-module-import-in-python
 
 #http://stackoverflow.com/questions/8525765/load-parameters-from-a-file-in-python
+
 class Params(object):
    def __init__(self, input_file_name):
       with open(input_file_name, 'r') as input_file:
@@ -168,23 +204,6 @@ class Params(object):
             if label != "" :
                data = row[1].replace(" ","").replace("\r","").replace("\n","")  # rest of row is data list
                self.__dict__[label] = data #values if len(values) > 1 else values[0]
-
-def GetLine(keyPattern=None) :
-   import sys
-   import re
-   c=10
-   #a=sys.stdin.readline()
-   #if a == '' : return False
-   #return a.replace("\r","").replace("\n","")
-   a=sys.stdin.readline().replace("\r","").replace("\n","")
-   while a != '' :
-      good=False
-      if keyPattern is None : good=True
-      elif re.search(keyPattern,a) is not None : good=True
-      if good : return a
-      a=sys.stdin.readline().replace("\r","").replace("\n","")
-   return False
-
 
 class tag_op :
 
@@ -258,16 +277,14 @@ class tag_op :
       self.v=options.verbose
       self.oat=options.oat
 
+##### LOCAL FUNCTIONALITIES : END
 
-def EchoInputFile(text) :
-   print 'Input File  :',text
 
-def EchoOutputFile(text) :
-   print 'Output File :',text
 
-def NoneOrList(ar) :
-   if ar is None : return None
-   return ar.tolist()
+
+
+
+##### COMMAND LINE FRONT END : START
 
 def main():
    import re

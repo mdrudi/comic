@@ -1,25 +1,7 @@
 #!/usr/bin/python
 
-#from sp_type import Characteristic
 import sp_type
 import sp_glob
-
-#verbose=False
-
-#center of input layer : 1.47 4.58 7.94 11.55
-# input layers         : 0 - 2.94 - 6.22 - 9.66 - 13.44
-# input thickness      : 2.94 3.28 3.44 3.78
-
-#def FindIndex (a,MyOutputLonMin,MyOutputLonMax):
-#   import numpy
-#   mapCondition = ((MyOutputLonMin<=a) * (a<=MyOutputLonMax))
-#   e= numpy.extract(mapCondition,numpy.arange(a.size))
-#   MyOutputLonIndex=[e.min(),e.max()]
-#   if sp_glob.verbose : print 'Inner : ',a[MyOutputLonIndex[0]]
-#   #print mm[m.index(True)]
-#   if sp_glob.verbose : print 'Outer : ',a[MyOutputLonIndex[1]]
-#   return MyOutputLonIndex
-
 
 
 def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False) :  
