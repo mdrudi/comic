@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sp_glob
-import sp_type
+#import sp_type
 from sp_ionc import ReadFile, WriteFile
 import sp_bm
 
@@ -15,11 +15,18 @@ sp_glob.verbose=False
 
 ##### PUBLIC FUNCTIONALITIES : START
 
-def ParseRange ( opt ) :
+def ParseRange ( opt , Time=False ) :
    import numpy
    import json
    #return numpy.array(map(float,opt.replace(" ","").replace("[","").replace("]","").split(",")))
-   return numpy.array(json.loads(opt))
+   if Time :
+      import datetime
+      tmpList=json.loads(opt)
+      for i in range(len(tmpList)) :
+         tmpList[i]=datetime.datetime.strptime(tmpList[i],"%Y-%m-%d %H:%M")
+   else :
+      tmpList=json.loads(opt)
+   return numpy.array(tmpList)
 
 def GetLine(keyPattern=None) :
    import sys
@@ -44,8 +51,12 @@ def EchoOutputFile(text) :
    print 'Output File :',text
 
 def NoneOrList(ar) :
+   import datetime
    if ar is None : return None
-   return ar.tolist()
+   if len(ar) and type(ar[0]) is datetime.datetime : 
+      return ar
+   else : 
+      return ar.tolist()
 
 class sp :
    def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,RemoveInput=False) :
@@ -209,6 +220,7 @@ class tag_op :
 
    def __init__(self) :
       import optparse
+      import datetime 
 
       parser = optparse.OptionParser()
       parser.add_option("--ifile",   dest="MyInputFile",     default="none",   metavar="InFile",    help="read data from file InFile (netcdf format) ; if InFile='list' then read data from the list of files which names are passed in standard input") 
@@ -217,7 +229,7 @@ class tag_op :
       parser.add_option("--ikey",    dest="iKey",            default=None,     metavar="iKey",      help="optional - input selection key")
       parser.add_option("--iClean",  dest="iClean",          default=False,    action="store_true", help="flag to remove the input file after reading")
       parser.add_option("--ofile",   dest="MyOutFile",       default="out.nc", metavar="OutFile",   help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
-      parser.add_option("--oat",     dest="oat",             default=None,     action="store_true", help="flag to activate the computation of average value over time")
+      parser.add_option("--oat",     dest="oat",             default=None,     metavar="OutTRange", help="flag to activate the computation of average value over time range given here as parameter")     #action="store_true",
       parser.add_option("--oav",     dest="oav",             default=None,     metavar="OutLayer" , help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
       parser.add_option("--oao",     dest="oao",             default=None,     action="store_true", help="flag to activate the computation of average value over the spatial lon lat plane")
       parser.add_option("--otc",     dest="otc",             default=None,     action="store_true", help="flag to concatenate output along the time dimension into one single output file")
@@ -226,16 +238,10 @@ class tag_op :
       parser.add_option("--bm",      dest="bm",              default=False,    action="store_true", help="print and save benchmarking information")
       parser.add_option("-s",        dest="SpeedUp",         default=False,    action="store_true", help="might use more memory and improve the execution speed")
       (options, args) = parser.parse_args()
-      #print options
-      #print args
 
       if options.MyParameterFile != 'none' :
-         #print options.MyParameterFile
-         #exec "import %s" % options.MyParameterFile
          params = Params(options.MyParameterFile)
-         #print options.MyInputFile
          if options.MyInputFile == 'none' : 
-            #print options.MyInputFile
             options.MyInputFile=params.MyInputFile
          options.MyInputVariable=params.MyInputVariable
          options.MyOutputLayer=params.MyOutputLayer
@@ -244,15 +250,17 @@ class tag_op :
          if ~ hasattr(params,"MyOutputLat") : params.MyOutputLat=None
          options.MyOutputLat=params.MyOutputLat
 
+      if options.oat is not None :
+         self.OutTRange=ParseRange(options.oat,Time=True)
+      else :
+         self.OutTRange=None
+
       if options.oav is not None :
          self.OutLayer=ParseRange(options.oav) 
       else :
          self.OutLayer=None
 
       if options.LonLat is not None :
-         #import numpy
-         #import json
-         #self.LonLat=numpy.array(json.loads(options.LonLat))
          self.LonLat=ParseRange(options.LonLat)
       else :
          self.LonLat=None
@@ -275,7 +283,6 @@ class tag_op :
       self.bm=options.bm
       self.s=options.SpeedUp
       self.v=options.verbose
-      self.oat=options.oat
 
 ##### LOCAL FUNCTIONALITIES : END
 
@@ -297,23 +304,23 @@ def main():
       sp_glob.verbose=True
    
    VSpaceAverage=(opt.OutLayer is not None) 
-   TimeAverage=(opt.oat is not None)
+   TimeAverage=(opt.OutTRange is not None)
    OSpaceAverage=(opt.oao is not None) 
    One2One=(opt.InFile != 'list')
    Many2One=(opt.InFile == 'list') and ( TimeAverage or opt.otc is not None )
    Many2Many=(opt.InFile == 'list') and not TimeAverage and opt.otc is None
 
    print "\nInput"
-   print " Input File/s    : ", opt.InFile
-   print " Selection Key   : ", opt.iKey
+   print " Input File/s     : ", opt.InFile
+   print " Selection Key    : ", opt.iKey
    print "\nWorking Domain"
-   print " Variable/s      : ", opt.Variables
-   print " Time Range      :  None"
-   print " Depth Range     :  None"
-   print " Lon x Lat Range : ", NoneOrList(opt.LonLat)    #.tolist()
+   print " Variable/s       : ", opt.Variables
+   print " Time Range       :  None"
+   print " Depth Range      :  None"
+   print " Lon x Lat Range  : ", NoneOrList(opt.LonLat)
    print "\nComputation"
-   print " Grid - Time      : ", opt.oat
-   print " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
+   print " Grid - Time      : ", NoneOrList(opt.OutTRange)
+   print " Grid - Layer     : ", NoneOrList(opt.OutLayer)
    print " Grid - Lon x Lat : ", opt.oao
    print "\nOutput"
    if Many2Many : 
@@ -328,7 +335,7 @@ def main():
    print "\nWhich I/O Flow Schema"
    print " many to many :",Many2Many
    print " many to one  :",Many2One
-   print " one to one   :",One2One
+   print " one  to one  :",One2One
    print "\n"
    print "\nExecution-------"
 

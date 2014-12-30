@@ -156,7 +156,7 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    #OutDataset = netCDF4.Dataset('testout_nc3c.nc', 'w', format='NETCDF3_CLASSIC')  #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
    #OutDataset = netCDF4.Dataset('testout_nc3x.nc', 'w', format='NETCDF3_64BIT')    #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
 
-   OutDataset.history = 'Created ' + time.ctime(time.time())
+   OutDataset.history = 'Created by COMIC ' + time.ctime(time.time())
    OutDataset.Conventions = "CF-1.6"
 
    #print Out.shape
@@ -286,7 +286,7 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutT.standard_name='time'
    tmpOutT.axis='T'
    tmpOutT.bounds='time_bnds'
-   tmpOutT[:]=cOut.TimeCells[:cOut.TimeCells.size-1] #+12
+   tmpOutT[:]=cOut.TimeCells[:cOut.TimeCells.size-1]
 
    tmpOutTB=OutDataset.variables['time_bnds']
    #tmpOutTB.units='seconds since 1900-01-01 00:00:00'
@@ -295,7 +295,6 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutTB[:,0]=cOut.TimeCells[:cOut.TimeCells.size-1]
    tmpOutTB[:,1]=cOut.TimeCells[1:]
 
-   #print cOut.TimeCells[:]
 
    OutDataset.close()
 

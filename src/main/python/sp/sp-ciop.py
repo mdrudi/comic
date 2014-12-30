@@ -84,13 +84,13 @@ def main():
    Many2Many=(opt['InFile'] == 'list') and not ( TimeAverage or opt['otc'] ) 
 
    print "\nInput"
-   print " Input File/s    : ", opt['InFile']
-   print " Selection Key   : ", opt['iKey']
+   print " Input File/s     : ", opt['InFile']
+   print " Selection Key    : ", opt['iKey']
    print "\nWorking Domain"
-   print " Variable/s      : ", opt['Var']
-   print " Time Range      :  None"
-   print " Depth Range     :  None"
-   print " Lon x Lat Range : ", sp.NoneOrList(opt['LonLat'])
+   print " Variable/s       : ", opt['Var']
+   print " Time Range       :  None"
+   print " Depth Range      :  None"
+   print " Lon x Lat Range  : ", sp.NoneOrList(opt['LonLat'])
    print "\nComputation"
    print " Grid - Time      : ", opt['oat']
    print " Grid - Layer     : ", sp.NoneOrList(opt['OutLayer'])
@@ -108,7 +108,7 @@ def main():
    print "\nWhich I/O Flow Schema : "
    print " many to many :",Many2Many
    print " many to one  :",Many2One
-   print " one to one   :",One2One
+   print " one  to one  :",One2One
    print "\n"
    print "\nExecution-------"
 
