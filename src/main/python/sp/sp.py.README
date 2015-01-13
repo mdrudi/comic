@@ -21,3 +21,7 @@ sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifiel
 sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]' -v
 
 sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --otc < ../inputfiles
+
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat='[]' --bm < ../inputfiles
+
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat='["1986-12-31 14:00","1987-01-03 12:00"]' --bm < ../inputfiles

@@ -59,7 +59,7 @@ def NoneOrList(ar) :
       return ar.tolist()
 
 class sp :
-   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,RemoveInput=False) :
+   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeRange=None,RemoveInput=False) :
 
       self.OutApp=None
 
@@ -88,7 +88,7 @@ class sp :
       self.OutputLayer=OutputLayer
       self.OutFileName=OutFileName
       self.OutLonLat=OutLonLat
-      self.TimeAverage=TimeAverage
+      self.TimeRange=TimeRange
 
       #behaviour flags
       self.bm=bm
@@ -136,14 +136,18 @@ class sp :
          if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
          if not ( self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) ) :
             self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
+         if self.TimeRange is not None :
+            self.OutApp.set_weight(self.TimeRange)
       else :
-         if self.TimeAverage :
-            self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+         #import numpy
+         #print type(self.TimeAverage)
+         if self.TimeRange is not None :   #ture = TimeRange is a time range or an empty time range ; false = TimeRange is None
+            self.OutApp.operator_tAdd(InApp,TimeAverage=True)
          else :
             if self.LonLat is not None : InApp.mask_out_of(self.LonLat)
             #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] :
             if self.OutApp.IsAdiacent(InApp) :
-               self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+               self.OutApp.operator_tAdd(InApp)     #,self.TimeAverage)
             else :
                self.CatList.append(InApp)
                print 'WARNING 15 : not able to handle this case now : concatenation postponed'
@@ -164,7 +168,7 @@ class sp :
 
 
    def loop_close(self) :
-      if self.TimeAverage : 
+      if self.TimeRange is not None :   #ture = TimeRange is a time range or an empty time range ; false = TimeRange is None
          self.OutApp.operator_tClose()
       else :
          maxi=len(self.CatList)
@@ -175,7 +179,7 @@ class sp :
             #for InApp in self.CatList :
                #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] : 
                if self.OutApp.IsAdiacent(InApp) :
-                  self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+                  self.OutApp.operator_tAdd(InApp)    #,self.TimeAverage)
                else :
                   self.CatList.append(InApp)
       if len(self.CatList) != 0 : print 'ERROR 1 : wrong input'
@@ -346,7 +350,7 @@ def main():
 
    if opt.bm : sp_bm.bm_update(sp_bm.BM_INIT)
 
-   my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+   my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , RemoveInput=opt.iClean )
 
    # many files to one file
    if Many2One : 
