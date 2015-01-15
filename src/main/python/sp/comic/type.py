@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import numpy
-import sp_glob 
+#import sp_glob 
+import glob as sp_glob
 
 
 def FindLowerTop(LayerIn,LayerOutLower,LayerOutTop) :

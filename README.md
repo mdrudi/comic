@@ -3,7 +3,7 @@ The **C**alculator f**O**r **M**arine **I**ndicators and **C**haracteristics - *
 [WP6 Assessmento of Good Environmental Status for the oceans and seas] (http://www.melodiesproject.eu/node/35), 
 in project [MELODIES - http://www.melodiesproject.eu] (http://www.melodiesproject.eu) . 
 
-**The MELODIES project - Maximizing the Exploitation of Linked Open Data In Enterprose and Science** : 
+**The MELODIES project - Maximizing the Exploitation of Linked Open Data In Enterprise and Science** : 
 this project aims to demonstrate the business and scientific benefits of releasing data openly through real applications .
 
 **WP6 Assessment of Good Environmental Status for the oceans and seas** : a new services in development 
@@ -17,7 +17,7 @@ by 2020 as defined in [Marine Strategy Framework Directive - DIRECTIVE 2008/56/E
 This software aims to compute *GES characteristics and indicators* from *multi-year Earth Observation and Model datasets*, available as [open data](https://open-data.europa.eu/en/data) 
 
 The initial design took into consideration issues related to the huge volume of available inputs, 
-hence the **performance requirements**, due to such kind of applications, 
+hence the **performance requirements**, due to some kind of applications, 
 and the **efficiency** in computation and data access, due to the growing relevance of the [sustainability](http://ec.europa.eu/environment/eussd/) issue. 
 The development is based as much as possible on criteria for software and technology **reusability**.   
 

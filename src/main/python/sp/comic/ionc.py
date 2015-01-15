@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-import sp_type
-import sp_glob
+from . import type as sp_type
+#import sp_glob
+from . import glob
 
 
 def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False) :  
@@ -40,14 +41,16 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       MyDatasetLon=MyDatasetLon[MyOutputLonIndex[0]:MyOutputLonIndex[1]]
    else :
       MyOutputLonIndex=(0,MyDatasetLon.size)
-   if sp_glob.verbose : print 'Lon Index :',MyOutputLonIndex
+   #if sp_glob.verbose : print 'Lon Index :',MyOutputLonIndex
+   if glob.verbose : print 'Lon Index :',MyOutputLonIndex
    #if MyOutputLat != 'all' :
    if MyOutputLat is not None :
       MyOutputLatIndex=sp_type.FindIndex(MyDatasetLat[:],MyOutputLat[0],MyOutputLat[1])
       MyDatasetLat=MyDatasetLat[MyOutputLatIndex[0]:MyOutputLatIndex[1]]
    else :
       MyOutputLatIndex=(0,MyDatasetLat.size)
-   if sp_glob.verbose : print 'Lat Index :',MyOutputLatIndex
+   #if sp_glob.verbose : print 'Lat Index :',MyOutputLatIndex
+   if glob.verbose : print 'Lat Index :',MyOutputLatIndex
 
    #print 'XYZ',MyDatasetLon,MyDatasetLat
    #build layer
@@ -62,7 +65,8 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    #print "mmm",MyDatasetDepthLayer.size,MyDatasetDepthLayer
 
       MyInputDepthIndex=sp_type.FindIndex(MyDatasetDepthLayer,af64MyOutputLayer.min(),af64MyOutputLayer.max())
-      if sp_glob.verbose : print 'Depth Index :',MyInputDepthIndex
+      #if sp_glob.verbose : print 'Depth Index :',MyInputDepthIndex
+      if glob.verbose : print 'Depth Index :',MyInputDepthIndex
       #MyInputDepthIndex[1]=MyInputDepthIndex[1]+1
       #if MyInputDepthIndex[0]>0 : MyInputDepthIndex[0]=MyInputDepthIndex[0]-1
       MyDatasetDepthLayer=MyDatasetDepthLayer[MyInputDepthIndex[0]:MyInputDepthIndex[1]+1]

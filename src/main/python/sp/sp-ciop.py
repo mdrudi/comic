@@ -1,15 +1,17 @@
 #!/usr/bin/python
 
 import sp_bm
+sp_bm.bm_setup()
+
 import sp
 
 #############   CIOP FRONT END   
 
-import site
+#import site
 import os
-import sys
 
 # import the ciop functtons (e.g. copy, log)
+import sys
 sys.path.append('/usr/lib/ciop/python/')
 import cioppy as ciop
 
@@ -40,13 +42,15 @@ def PutOutput(output_name, RemoveOutput=False, par_metalink=False) :
 opt=dict()
 
 def main():
-   import re
+#   import re
 
-   sp_bm.bm_setup()
+#   sp_bm.bm_setup()
+   import comic
 
    os.chdir(os.environ['TMPDIR'])
 
    print "sp-ciop.py"
+   print "available processors :",comic.processor.dict
 
    #opt=dict()
    opt['InFile']=ciop.getparam('InFile')   #MANDATORY
@@ -113,13 +117,14 @@ def main():
    print "\nExecution-------"
 
    if opt['iKey'] is not None :
+      import re
       keyPattern=re.compile(opt['iKey'])
    else :
       keyPattern=None
 
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_INIT)
 
-   my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+   my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
 
    if Many2One :
       one=False
