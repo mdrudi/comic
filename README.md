@@ -10,6 +10,9 @@ this project aims to demonstrate the business and scientific benefits of releasi
 within the MELODIES project, for the assessment of GES (Good Environmental Status) and support its achievement 
 by 2020 as defined in [Marine Strategy Framework Directive - DIRECTIVE 2008/56/EC OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL] (http://ec.europa.eu/environment/marine/eu-coast-and-marine-policy/marine-strategy-framework-directive/index_en.htm)
 
+## Acknowledgements
+
+...
 
 
 # COMIC
