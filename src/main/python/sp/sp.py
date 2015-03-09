@@ -169,20 +169,17 @@ class Params(object):
                data = row[1].replace(" ","").replace("\r","").replace("\n","")  # rest of row is data list
                self.__dict__[label] = data #values if len(values) > 1 else values[0]
 
-def GetLine(keyPattern=None) :
+def GetLine(keyPattern=None,stream=None) :
    import sys
    import re
-   c=10
-   #a=sys.stdin.readline()
-   #if a == '' : return False
-   #return a.replace("\r","").replace("\n","")
-   a=sys.stdin.readline().replace("\r","").replace("\n","")
+   if stream is None : stream=sys.stdin
+   a=stream.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
    while a != '' :
       good=False
       if keyPattern is None : good=True
       elif re.search(keyPattern,a) is not None : good=True
       if good : return a
-      a=sys.stdin.readline().replace("\r","").replace("\n","")
+      a=stream.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
    return False
 
 

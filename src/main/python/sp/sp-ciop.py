@@ -37,6 +37,31 @@ def PutOutput(output_name, RemoveOutput=False, par_metalink=False) :
    if RemoveOutput : os.remove(output_name)
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
+def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
+   import sys
+   if type == "stream" :
+      #print "type="+type+", Processing stream..."
+      stream=open(InitFileName) 
+      InputFileName=sp.GetLine(keyPattern,stream)
+      #print "InputFileName="+InputFileName
+   else : 
+      #print "type="+type+", Processing single..."
+      InputFileName=InitFileName
+      stream=sys.stdin
+   one=False
+   while InputFileName :
+      one=True
+      LocalInputFileName = GetInput(InputFileName)
+      sp.EchoInputFile(LocalInputFileName)
+      my_sp.loop_go(LocalInputFileName)
+      #os.remove(LocalInputFileName)
+      InputFileName=sp.GetLine(keyPattern,stream)
+   if one :
+      output_name=my_sp.loop_close()
+      PutOutput(output_name, par_metalink=True)
+      sp.EchoOutputFile(output_name)
+
+
 opt=dict()
 
 def main():
@@ -119,24 +144,23 @@ def main():
 
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_INIT)
 
-   my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+   #my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
 
    if Many2One :
-      one=False
+      #one=False
       InputFileName=sp.GetLine(keyPattern)
-      while InputFileName :
-         one=True
+      if InputFileName[-4:]==".txt" :
+         print "Processing group..."
          LocalInputFileName = GetInput(InputFileName)
          sp.EchoInputFile(LocalInputFileName)
-         my_sp.loop_go(LocalInputFileName)
-         #os.remove(LocalInputFileName)
-         InputFileName=sp.GetLine(keyPattern)
-      if one :
-         output_name=my_sp.loop_close()
-         PutOutput(output_name, par_metalink=True)
-         sp.EchoOutputFile(output_name)
-
+         my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+         Many2OneBlock(my_sp,LocalInputFileName,None,type="stream") 
+      else : #in this case must be InputFileName[-3:]==".nc"
+         print "Processing simple..."
+         my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+         Many2OneBlock(my_sp,InputFileName,keyPattern)
    elif Many2Many :
+      my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
       InputFileName=sp.GetLine(keyPattern)
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)
@@ -156,8 +180,6 @@ def main():
 
    else :
       print "Nothing to do"
-
-#   if sp_glob.verbose : print 'Out[0,0,88,0]=',Out.COSM[0,0,88,0], type(Out.COSM[0,0,88,0]), repr(Out.COSM[0,0,88,0]),Out.COSM[:,:,88,0]
 
    if opt['bm'] : 
       sp_bm.bm_close()
