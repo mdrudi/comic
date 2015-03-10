@@ -65,7 +65,7 @@ SYNTAX ON COMMAND LINE
 
 A general call will look like :
 
-find ../../../[path]/../../ -iname bm.txt | [path]/sp_bm.py
+find ../../../[path]/../../ -iname bm.txt | python [path]/bmmng.py
 
 
 

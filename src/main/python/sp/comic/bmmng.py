@@ -14,10 +14,10 @@ def bm_setup() :
    global t_last
    global bminfo
    t_last=time.time()
-   t_init=0
-   t_read=0
-   t_compute=0
-   t_write=0
+   #t_init=0
+   #t_read=0
+   #t_compute=0
+   #t_write=0
    bminfo=dict(t_init=0,t_read=0,t_compute=0,t_write=0,t_bm=0,t_wrap=0,in_byte=0,in_point=0,in_spoint=0,out_byte=0,out_point=0,out_spoint=0,p_max_mem=0)
 
 def bm_update(type,data=None) :
@@ -118,4 +118,6 @@ def main() :
 
 if __name__ == "__main__":
    main()
+else :
+   bm_setup()
 

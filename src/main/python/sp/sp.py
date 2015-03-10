@@ -3,8 +3,9 @@
 #import sp_glob
 #from sp_ionc import ReadFile, WriteFile
 
-import sp_bm
-sp_bm.bm_setup()
+#import sp_bm
+#sp_bm.bm_setup()
+import comic
 
 #sp_glob.verbose=False
 
@@ -170,7 +171,7 @@ class tag_op :
 def main():
    import re
    #sp_bm.bm_setup()
-   import comic
+   #import comic
 
    print "sp.py"
    print "available processors :",comic.processor.dict
@@ -236,7 +237,7 @@ def main():
    else :
       keyPattern=None
 
-   if opt.bm : sp_bm.bm_update(sp_bm.BM_INIT)
+   if opt.bm : comic.bmmng.bm_update(comic.bmmng.BM_INIT)
 
    if FieldComputation :
       my_sp=comic.pilot(opt.OutField,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , RemoveInput=opt.iClean )
@@ -278,7 +279,7 @@ def main():
 
    #if sp_glob.verbose : print 'Out[0,0,88,0]=',my_sp.COSM[0,0,88,0], type(my_sp.COSM[0,0,88,0]), repr(my_sp.COSM[0,0,88,0]),my_sp.COSM[:,:,88,0]
 
-   if opt.bm : sp_bm.bm_close()
+   if opt.bm : comic.bmmng.bm_close()
 
 
 

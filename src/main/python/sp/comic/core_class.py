@@ -2,7 +2,7 @@
 
 from ionc import ReadFile, WriteFile
 from . import processor
-import sp_bm
+from . import bmmng as sp_bm
 
 
 class sp :
