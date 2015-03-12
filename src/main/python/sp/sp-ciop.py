@@ -48,7 +48,7 @@ def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
       #print "type="+type+", Processing single..."
       InputFileName=InitFileName
       stream=sys.stdin
-   one=False
+   one=False    #in this version, at least one always exists
    while InputFileName :
       one=True
       LocalInputFileName = GetInput(InputFileName)
@@ -149,16 +149,19 @@ def main():
    if Many2One :
       #one=False
       InputFileName=sp.GetLine(keyPattern)
-      if InputFileName[-4:]==".txt" :
-         print "Processing group..."
-         LocalInputFileName = GetInput(InputFileName)
-         sp.EchoInputFile(LocalInputFileName)
-         my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
-         Many2OneBlock(my_sp,LocalInputFileName,None,type="stream") 
-      else : #in this case must be InputFileName[-3:]==".nc"
-         print "Processing simple..."
-         my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
-         Many2OneBlock(my_sp,InputFileName,keyPattern)
+      if InputFileName :
+         if InputFileName[-4:]==".txt" :
+            while InputFileName :
+               LocalInputFileName = GetInput(InputFileName)
+               print "Processing group..."+LocalInputFileName
+               sp.EchoInputFile(LocalInputFileName)
+               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+               Many2OneBlock(my_sp,LocalInputFileName,None,type="stream") 
+               InputFileName=sp.GetLine(keyPattern)
+         else : #in this case must be InputFileName[-3:]==".nc"
+            print "Processing simple..."
+            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+            Many2OneBlock(my_sp,InputFileName,keyPattern)
    elif Many2Many :
       my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
       InputFileName=sp.GetLine(keyPattern)

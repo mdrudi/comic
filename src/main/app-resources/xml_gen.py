@@ -123,7 +123,7 @@ defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
 sPar(defaultParameters,'InFile','list')
-sPar(defaultParameters,'iKey','/last1|^last1')
+sPar(defaultParameters,'iKey','/last|^last')
 sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
@@ -163,7 +163,7 @@ defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
 sPar(defaultParameters,'InFile','list')
-sPar(defaultParameters,'iKey','/last1|^last1')
+sPar(defaultParameters,'iKey','/last|^last')
 sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','out.nc')

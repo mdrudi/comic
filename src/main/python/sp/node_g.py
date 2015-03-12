@@ -72,5 +72,14 @@ def main():
       except : print "Issue to plublish by ciop"
 
 if __name__ == "__main__":
+   import sp_bm
+   sp_bm.bm_setup()
    main()
+   sp_bm.bm_update(sp_bm.BM_WRAP)
+   sp_bm.bm_close()
+   try :
+      pathname=os.environ['TMPDIR']+'/bm.txt_'+os.environ['mapred_task_id']
+      os.rename('bm.txt',pathname)
+      ciop.publish(pathname)
+   except : print "Issue to publish by ciop benchmarking info"
 
