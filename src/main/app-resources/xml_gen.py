@@ -123,7 +123,8 @@ defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
 sPar(defaultParameters,'InFile','list')
-sPar(defaultParameters,'iKey','/last|^last')
+#sPar(defaultParameters,'iKey','/lastcomic|^lastcomic')
+sPar(defaultParameters,'iKey','\.txt$')
 sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
@@ -163,10 +164,10 @@ defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
 sPar(defaultParameters,'InFile','list')
-sPar(defaultParameters,'iKey','/last|^last')
+#sPar(defaultParameters,'iKey','/lastcomic6|^lastcomic6')
 sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'LonLat','')
-sPar(defaultParameters,'OutFile','out.nc')
+#sPar(defaultParameters,'OutFile','out.nc')
 #sPar(defaultParameters,'oat','')
 #sPar(defaultParameters,'OutLayer','')
 sPar(defaultParameters,'oao','True')
@@ -219,10 +220,10 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-# node_g
+# node_g_m
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_g')
+node.set('id','node_g_m')
 node.text='\n'
 node.tail='\n'
 
@@ -241,9 +242,9 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-#sPar(parameters,'iKey','.nc$')
+sPar(parameters,'GroupRange','6')
 
-# node_t
+# node_t_m
 
 #myRange=range(startYear,endYear+1)
 
@@ -253,7 +254,7 @@ parameters.tail='\n'
 #      if i == endYear and m == endMonth : break
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_t')
+node.set('id','node_t_m')
 node.text='\n'
 node.tail='\n'
 
@@ -265,7 +266,7 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_g'
+source.text='node_g_m'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
@@ -275,10 +276,34 @@ parameters.tail='\n'
 #sPar(parameters,'OutFile','last'+strYYYYMM+'.nc')
 #sPar(parameters,'iKey','/'+strYYYYMM+'|^'+strYYYYMM)
 
-# node_o 
+# node_g_a
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_o')
+node.set('id','node_g_a')
+node.text='\n'
+node.tail='\n'
+
+ET.SubElement(node,'job').set('id','jt_g')
+
+sources=ET.SubElement(node,'sources')
+sources.text='\n'
+sources.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='node_t_m'
+source.tail='\n'
+
+parameters=ET.SubElement(node,'parameters')
+parameters.text='\n'
+parameters.tail='\n'
+
+sPar(parameters,'GroupRange','4')
+
+# node_o_m 
+
+node=ET.SubElement(workflow,'node')
+node.set('id','node_o_m')
 node.text='\n'
 node.tail='\n'
 
@@ -298,12 +323,75 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_t'
+source.text='node_t_m'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
+
+sPar(parameters,'iKey','\.nc$')
+sPar(parameters,'OutFile','out6.nc')
+
+#node_t_a
+
+node=ET.SubElement(workflow,'node')
+node.set('id','node_t_a')
+node.text='\n'
+node.tail='\n'
+
+ET.SubElement(node,'job').set('id','jt_t')
+
+sources=ET.SubElement(node,'sources')
+sources.text='\n'
+sources.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='node_g_a'
+source.tail='\n'
+
+parameters=ET.SubElement(node,'parameters')
+parameters.text='\n'
+parameters.tail='\n'
+
+#node_o_a
+
+node=ET.SubElement(workflow,'node')
+node.set('id','node_o_a')
+node.text='\n'
+node.tail='\n'
+
+ET.SubElement(node,'job').set('id','jt_o')
+
+sources=ET.SubElement(node,'sources')
+sources.text='\n'
+sources.tail='\n'
+
+#for y in myRange :
+#   for m in ('01','02','03','04','05','06','07','08','09','10','11','12') :
+#      source=ET.SubElement(sources,'source')
+#      source.set('refid','wf:node')
+#      source.text='node_t_'+str(y)+m
+#      source.tail='\n'
+#      if y == endYear and m == endMonth : break
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='node_o_m'
+source.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='node_t_a'
+source.tail='\n'
+
+parameters=ET.SubElement(node,'parameters')
+parameters.text='\n'
+parameters.tail='\n'
+
+sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
+sPar(parameters,'OutFile','out4.nc')
 
 #ET.dump(application)
 print ET.tostring(application)

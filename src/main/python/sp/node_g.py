@@ -41,29 +41,34 @@ def main():
    #opt['InFile']=ciop.getparam('InFile')   #MANDATORY
    try : 
       iKey=ciop.getparam('iKey')
-      print "Read selection key "
-   except : iKey=None
-   print "Selection key: ",iKey
+      print "Read iKey"
+      GroupRange=int(ciop.getparam('GroupRange'))
+      print "Read GroupRange"
+   except : 
+      iKey=None
+      GroupRange=6
+   print "iKey: ",iKey
+   print "GroupRange (6-> month,4->year):"+str(GroupRange)
 
    InputPathFileName=GetLine(iKey)
    while InputPathFileName :
       InputFileName=os.path.basename(InputPathFileName)      
-      month=InputFileName[0:6]
-      if month in lib.keys() :
-         list_files=lib[month]
+      myGroup=InputFileName[0:GroupRange]
+      if myGroup in lib.keys() :
+         list_files=lib[myGroup]
          list_files.append(InputPathFileName)
       else :
          list_files=list()
          list_files.append(InputPathFileName)
-         lib[month]=list_files
-      print month,InputFileName,InputPathFileName
+         lib[myGroup]=list_files
+      print myGroup,InputFileName,InputPathFileName
       InputPathFileName=GetLine(iKey)
 
-   for month in lib.keys() :
-      out_file_name="last"+month+".txt"
+   for myGroup in lib.keys() :
+      out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
       out_file = open(out_file_name,"w")
       print out_file_name
-      for InputPathFileName in lib[month] :
+      for InputPathFileName in lib[myGroup] :
          out_file.write(InputPathFileName+"\n")
       out_file.close()
       try : 
