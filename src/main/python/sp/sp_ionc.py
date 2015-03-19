@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import sys
+
 #from sp_type import Characteristic
 import sp_type
 import sp_glob
@@ -28,7 +30,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    import os
 
    MyDataset=netCDF4.Dataset(MyInputFile)
-   print 'WARNING 13 : now able to read only Med MFC file format, an important inprovement would be the ability to read bounds'
+   print >>sys.stderr, 'WARNING 13 : now able to read only Med MFC file format, an important inprovement would be the ability to read bounds'
    MyDatasetVariable=MyDataset.variables[MyInputVariable]
 
    StandardName=getattr(MyDatasetVariable,'standard_name')
@@ -58,18 +60,18 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       MyDatasetLon=MyDatasetLon[MyOutputLonIndex[0]:MyOutputLonIndex[1]]
    else :
       MyOutputLonIndex=(0,MyDatasetLon.size)
-   if sp_glob.verbose : print 'Lon Index :',MyOutputLonIndex
+   if sp_glob.verbose : print >>sys.stderr, 'Lon Index :',MyOutputLonIndex
    #if MyOutputLat != 'all' :
    if MyOutputLat is not None :
       MyOutputLatIndex=sp_type.FindIndex(MyDatasetLat[:],MyOutputLat[0],MyOutputLat[1])
       MyDatasetLat=MyDatasetLat[MyOutputLatIndex[0]:MyOutputLatIndex[1]]
    else :
       MyOutputLatIndex=(0,MyDatasetLat.size)
-   if sp_glob.verbose : print 'Lat Index :',MyOutputLatIndex
+   if sp_glob.verbose : print >>sys.stderr, 'Lat Index :',MyOutputLatIndex
 
    #print 'XYZ',MyDatasetLon,MyDatasetLat
    #build layer
-   print "WARNING 4 : not able to read depth boundaries"
+   print >>sys.stderr, "WARNING 4 : not able to read depth boundaries"
    MyDatasetDepthLayer=numpy.insert(MyDatasetDepth[:],0,0)
    for i in range(MyDatasetDepth[:].size) :
       MyDatasetDepthLayer[i+1]=MyDatasetDepth[i]*2-MyDatasetDepthLayer[i] #prev
@@ -80,7 +82,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    #print "mmm",MyDatasetDepthLayer.size,MyDatasetDepthLayer
 
       MyInputDepthIndex=sp_type.FindIndex(MyDatasetDepthLayer,af64MyOutputLayer.min(),af64MyOutputLayer.max())
-      if sp_glob.verbose : print 'Depth Index :',MyInputDepthIndex
+      if sp_glob.verbose : print >>sys.stderr, 'Depth Index :',MyInputDepthIndex
       #MyInputDepthIndex[1]=MyInputDepthIndex[1]+1
       #if MyInputDepthIndex[0]>0 : MyInputDepthIndex[0]=MyInputDepthIndex[0]-1
       MyDatasetDepthLayer=MyDatasetDepthLayer[MyInputDepthIndex[0]:MyInputDepthIndex[1]+1]
@@ -168,7 +170,7 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    DepthLayer=cOut.DepthLayers
    #print netCDF4.default_fillvals
    #OutDataset = netCDF4.Dataset('testout_nc4.nc', 'w') 
-   print 'WARNING 14 : to fix the target format and the criteria to handle the time'
+   print >>sys.stderr, 'WARNING 14 : to fix the target format and the criteria to handle the time'
    OutDataset = netCDF4.Dataset(OutFileName, 'w')
    #OutDataset = netCDF4.Dataset('testout_nc4c.nc', 'w', format='NETCDF4_CLASSIC')
    #OutDataset = netCDF4.Dataset('testout_nc3c.nc', 'w', format='NETCDF3_CLASSIC')  #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl

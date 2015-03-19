@@ -70,31 +70,32 @@ def bm_update(type,data=None) :
 
 
 def bm_close() :
+   import sys
    global bminfo
    tot=bminfo['t_init']+bminfo['t_read']+bminfo['t_compute']+bminfo['t_write']+bminfo['t_bm']+bminfo['t_wrap']
    tot100=tot/100
 
-   print "\nbm---------------"
+   print >>sys.stderr, "\nbm---------------"
 
-   print "\nInput Data"
-   print "|  byte in memory  : ", bminfo['in_byte']
-   print "|  # grid point    : ", bminfo['in_point']
-   print "`  # sea point     : ", bminfo['in_spoint']
+   print >>sys.stderr, "\nInput Data"
+   print >>sys.stderr, "|  byte in memory  : ", bminfo['in_byte']
+   print >>sys.stderr, "|  # grid point    : ", bminfo['in_point']
+   print >>sys.stderr, "`  # sea point     : ", bminfo['in_spoint']
 
-   print "\nOutput Data"
-   print "|  byte in memory  : ", bminfo['out_byte']
-   print "|  # grid point    : ", bminfo['out_point']
-   print "`  # sea point     : ", bminfo['out_spoint']
+   print >>sys.stderr, "\nOutput Data"
+   print >>sys.stderr, "|  byte in memory  : ", bminfo['out_byte']
+   print >>sys.stderr, "|  # grid point    : ", bminfo['out_point']
+   print >>sys.stderr, "`  # sea point     : ", bminfo['out_spoint']
 
-   print "\nMax Memory         : ", bminfo['p_max_mem']*1024
+   print >>sys.stderr, "\nMax Memory         : ", bminfo['p_max_mem']*1024
 
-   print '\nInit         : (ms)',int(bminfo['t_init']),'-',int(round(bminfo['t_init']/tot100)),'%'
-   print 'i/o read     : (ms)',int(bminfo['t_read']),'-',int(round(bminfo['t_read']/tot100)),'%'
-   print 'computation  : (ms)',int(bminfo['t_compute']),'-',int(round(bminfo['t_compute']/tot100)),'%'
-   print 'i/o write    : (ms)',int(bminfo['t_write']),'-',int(round(bminfo['t_write']/tot100)),'%'
-   print 'benchmarking : (ms)',int(bminfo['t_bm']),'-',int(round( bminfo['t_bm'] /tot100)),'%'
-   print 'wrap         : (ms)',int(bminfo['t_wrap']),'-',int(round( bminfo['t_wrap'] /tot100)),'%'
-   print 'tot          :  (s)',tot/1000
+   print >>sys.stderr, '\nInit         : (ms)',int(bminfo['t_init']),'-',int(round(bminfo['t_init']/tot100)),'%'
+   print >>sys.stderr, 'i/o read     : (ms)',int(bminfo['t_read']),'-',int(round(bminfo['t_read']/tot100)),'%'
+   print >>sys.stderr, 'computation  : (ms)',int(bminfo['t_compute']),'-',int(round(bminfo['t_compute']/tot100)),'%'
+   print >>sys.stderr, 'i/o write    : (ms)',int(bminfo['t_write']),'-',int(round(bminfo['t_write']/tot100)),'%'
+   print >>sys.stderr, 'benchmarking : (ms)',int(bminfo['t_bm']),'-',int(round( bminfo['t_bm'] /tot100)),'%'
+   print >>sys.stderr, 'wrap         : (ms)',int(bminfo['t_wrap']),'-',int(round( bminfo['t_wrap'] /tot100)),'%'
+   print >>sys.stderr, 'tot          :  (s)',tot/1000
 
    import json
    json.dump(bminfo,open('bm.txt','w'))

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import numpy
+import sys
 
 #http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
 def find_nearest(array,value):
@@ -114,7 +115,7 @@ class Characteristic :
       #print 'XXX os1',In.COSM.shape
       OpeV=(OutDepth is not None)
       OpeO=(OutLonLat is not None)
-      print 'WARNING 16 : possible further improvement changing the computation flow'
+      print >>sys.stderr, 'WARNING 16 : possible further improvement changing the computation flow'
       if OpeV :
          self.COSM=ProcessorS(self.COSM,self.DepthLayers,OutDepth)
          self.DepthLayers=OutDepth
@@ -140,13 +141,13 @@ class Characteristic :
          app=ProcessorS(In.COSM,In.DepthLayers,self.DepthLayers)
 
       if self.COSM.shape[2] == 1 : 
-         print "WARNING 2 : weak test on orizontal consistency"
+         print >>sys.stderr, "WARNING 2 : weak test on orizontal consistency"
          app=numpy.ma.mean(app,axis=2)
          app=numpy.ma.mean(app,axis=2)[:,:,numpy.newaxis,numpy.newaxis]
          #print 'XXX',app.shape
 
       if TimeAverage :
-         print "WARNING 7 : can't handle average over time in some cases : i.e. gap, different weights, ..."
+         print >>sys.stderr, "WARNING 7 : can't handle average over time in some cases : i.e. gap, different weights, ..."
          self.tCounter+=1
          #if self.tLastValidityTime is None : self.tLastValidityTime=In.TimeCells
          if self.TimeCells[1] < In.TimeCells[1] : self.TimeCells[1]=In.TimeCells[1]
@@ -174,7 +175,7 @@ class Characteristic :
             self.COSM=numpy.ma.concatenate((app,self.COSM),axis=0)
             #print 'AVF3',type(self.COSM),self.COSM.count()
          else :
-            print 'ERROR 2 : not possible to concatenate'
+            print >>sys.stderr, 'ERROR 2 : not possible to concatenate'
       #print 'AVF',type(self.COSM),self.COSM.count()
       #print self.tLastValidityTime
 
@@ -229,29 +230,29 @@ def FindWeight(Lower,Top,LayerIn,LayerOutLower,LayerOutTop) :
 def ProcessorS( FieldIn , LayerIn , LayerOut ) :
    import numpy
    #global verbose
-   print "BUG 1 : not considering partial step yet"
+   print >>sys.stderr, "BUG 1 : not considering partial step yet"
    internalType=numpy.float64 #FieldIn.dtype
    #internalType=FieldIn.dtype
    if sp_glob.verbose : 
-      print '\nProcessorS'
-      print 'FieldIn' #,FieldIn
-      print 'LayerIn',LayerIn.size,LayerIn
-      print 'LayerOut',LayerOut
+      print >>sys.stderr, '\nProcessorS'
+      print >>sys.stderr, 'FieldIn' #,FieldIn
+      print >>sys.stderr, 'LayerIn',LayerIn.size,LayerIn
+      print >>sys.stderr, 'LayerOut',LayerOut
    nLayer=len(LayerOut)-1    # number of layers in output
    #print FieldIn.shape[0]
    tmpOut=numpy.zeros( (FieldIn.shape[0],nLayer,FieldIn.shape[2], FieldIn.shape[3]), dtype=internalType )
-   print 'WARNING 9 : not clear whether nedded the following FieldIn[FieldIn.mask]=0'
+   print >>sys.stderr, 'WARNING 9 : not clear whether nedded the following FieldIn[FieldIn.mask]=0'
    #FieldIn[FieldIn.mask]=0
    #print FieldIn.fill_value   WARNING : forse e' meglio duplicare invece di modificare l'input....
 
    for iLayer in range(nLayer) :
-      if sp_glob.verbose : print 'processing layer' , iLayer #, LayerOut[iLayer],LayerOut[iLayer+1],LayerIn
+      if sp_glob.verbose : print >>sys.stderr, 'processing layer' , iLayer #, LayerOut[iLayer],LayerOut[iLayer+1],LayerIn
 
       (Lower,Top)=FindLowerTop(LayerIn,LayerOut[iLayer],LayerOut[iLayer+1])
       if sp_glob.verbose : print 'Lower',Lower,'Top',Top
 
       Weight=FindWeight(Lower,Top,LayerIn[Lower:Top+1],LayerOut[iLayer],LayerOut[iLayer+1])
-      if sp_glob.verbose : print 'Weight size',Weight.size,'Weight ', Weight
+      if sp_glob.verbose : print >>sys.stderr, 'Weight size',Weight.size,'Weight ', Weight
 
 #      W3D=numpy.ma.empty_like(FieldIn[:,Lower:Top+1,:,:])
 #      W3D=numpy.ma.masked_where(FieldIn[:,Lower:Top+1,:,:].mask,W3D)
@@ -277,9 +278,9 @@ def ProcessorS( FieldIn , LayerIn , LayerOut ) :
       #print W3D[:,i,:,:].shape, Sum[:,:,:].shape
       #print 'W3D2',type(W3D),W3D.shape,W3D.count(),FieldIn[:,Lower:Top+1,:,:].count(),W3D.min(),W3D.max() #,W3D
 
-      if sp_glob.verbose : print "Weight total", numpy.sum(Weight),'=',LayerOut[iLayer+1]-LayerOut[iLayer]
+      if sp_glob.verbose : print >>sys.stderr, "Weight total", numpy.sum(Weight),'=',LayerOut[iLayer+1]-LayerOut[iLayer]
       Weight/=(LayerOut[iLayer+1]-LayerOut[iLayer])
-      if sp_glob.verbose : print "Weight normalized", Weight
+      if sp_glob.verbose : print >>sys.stderr, "Weight normalized", Weight
 #MODALITA' CALCOLO 2
 #      WWW=numpy.ones_like(tmpOut[:,0,:,:])*Weight[0]
       #print WWW
@@ -290,7 +291,7 @@ def ProcessorS( FieldIn , LayerIn , LayerOut ) :
       #print FieldIn[:,Lower:Top+1,:,:].shape
 #      tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*WWW,axis=1)
       tmpOut[:,iLayer,:,:]=numpy.sum(FieldIn[:,Lower:Top+1,:,:]*W3D,axis=1)
-      if sp_glob.verbose : print 'ABC1 min,max', tmpOut[:,iLayer,:,:].min(),tmpOut[:,iLayer,:,:].max()
+      if sp_glob.verbose : print >>sys.stderr, 'ABC1 min,max', tmpOut[:,iLayer,:,:].min(),tmpOut[:,iLayer,:,:].max()
       #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,88,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,88,0]),FieldIn[0,Lower:Top+1,88,0],Weight[:]
       #Rif sp_glob.verbose : print "tmpOut FieldIn[0,i,0,0] Weight[i-Lower]/tot",repr(tmpOut[0,iLayer,0,0]),FieldIn[0,Lower:Top+1,0,0],Weight[:]
 #END 2
@@ -299,7 +300,7 @@ def ProcessorS( FieldIn , LayerIn , LayerOut ) :
 
    #tmpOut=numpy.ma.masked_equal(tmpOut,0)
    tmpOut=numpy.ma.array(tmpOut,mask=(tmpOut==0))
-   if sp_glob.verbose : print 'ABC2 min,max', tmpOut[:,:,:,:].min(),tmpOut[:,:,:,:].max()
+   if sp_glob.verbose : print >>sys.stderr, 'ABC2 min,max', tmpOut[:,:,:,:].min(),tmpOut[:,:,:,:].max()
    return tmpOut
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import os
 
 # import the ciop functtons (e.g. copy, log)
@@ -19,7 +20,7 @@ def GetLine(keyPattern=None) :
       elif re.search(keyPattern,a) is not None : good=True
 
       if good : return a
-      print "Dump ",a
+      print >>sys.stderr, "Dump ",a
       a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
 
    return False
@@ -28,27 +29,43 @@ def GetLine(keyPattern=None) :
 
 lib=dict()
 
+def GiveOutFile(myGroup,GroupRange,lib,Dump=False) :
+      out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
+      out_file = open(out_file_name,"w")
+      print >>sys.stderr, out_file_name
+      for InputPathFileName in lib[myGroup] :
+         out_file.write(InputPathFileName+"\n")
+      out_file.close()
+      if Dump :
+         print >>sys.stderr, "Dump "+os.getcwd()+'/'+out_file_name
+      else :
+         try :
+            print >>sys.stderr, "Publishing by ciop", out_file_name
+            ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
+         except : print >>sys.stderr, "Issue to plublish by ciop"
+         print os.getcwd()+'/'+out_file_name
 
 
 def main():
+   from calendar import monthrange,isleap
    try : 
       os.chdir(os.environ['TMPDIR'])
-      print "Change dir to", os.environ['TMPDIR'] 
-   except : print "Issue to change dir, working in current dir"
+      print >>sys.stderr, "Change dir to", os.environ['TMPDIR'] 
+   except : print >>sys.stderr, "Issue to change dir, working in current dir"
 
-   print "node_g.py"
+   print >>sys.stderr, "node_g.py"
 
    #opt['InFile']=ciop.getparam('InFile')   #MANDATORY
    try : 
       iKey=ciop.getparam('iKey')
-      print "Read iKey"
+      print >>sys.stderr, "Read iKey"
       GroupRange=int(ciop.getparam('GroupRange'))
-      print "Read GroupRange"
+      print >>sys.stderr, "Read GroupRange"
    except : 
       iKey=None
-      GroupRange=6
-   print "iKey: ",iKey
-   print "GroupRange (6-> month,4->year):"+str(GroupRange)
+      GroupRange=int(sys.argv[1]) #6
+   print >>sys.stderr, "iKey: ",iKey
+   print >>sys.stderr, "GroupRange (6-> month,4->year):"+str(GroupRange)
 
    InputPathFileName=GetLine(iKey)
    while InputPathFileName :
@@ -61,20 +78,32 @@ def main():
          list_files=list()
          list_files.append(InputPathFileName)
          lib[myGroup]=list_files
-      print myGroup,InputFileName,InputPathFileName
+      print >>sys.stderr, myGroup,InputFileName,InputPathFileName
+      DoIt=False
+      if GroupRange==6 :
+         if len(lib[myGroup]) == monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1] : DoIt=True
+      else : #here is GroupRange=4
+         nyyyy=365
+         if isleap(int(myGroup[0:4])) : nyyyy=366
+         if len(lib[myGroup]) == nyyyy : DoIt=True
+      if DoIt : 
+         GiveOutFile(myGroup,GroupRange,lib)
+         del lib[myGroup]
       InputPathFileName=GetLine(iKey)
 
    for myGroup in lib.keys() :
-      out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
-      out_file = open(out_file_name,"w")
-      print out_file_name
-      for InputPathFileName in lib[myGroup] :
-         out_file.write(InputPathFileName+"\n")
-      out_file.close()
-      try : 
-         print "Publishing by ciop", out_file_name
-         ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
-      except : print "Issue to plublish by ciop"
+      GiveOutFile(myGroup,GroupRange,lib,Dump=True)
+      #out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
+      #out_file = open(out_file_name,"w")
+      #print >>sys.stderr, out_file_name
+      #for InputPathFileName in lib[myGroup] :
+      #   out_file.write(InputPathFileName+"\n")
+      #out_file.close()
+      #try : 
+      #   print >>sys.stderr, "Publishing by ciop", out_file_name
+      #   ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
+      #except : print >>sys.stderr, "Issue to plublish by ciop"
+      #print os.getcwd()+'/'+out_file_name
 
 if __name__ == "__main__":
    import sp_bm
@@ -86,5 +115,5 @@ if __name__ == "__main__":
       pathname=os.environ['TMPDIR']+'/bm.txt_'+os.environ['mapred_task_id']
       os.rename('bm.txt',pathname)
       ciop.publish(pathname)
-   except : print "Issue to publish by ciop benchmarking info"
+   except : print >>sys.stderr, "Issue to publish by ciop benchmarking info"
 

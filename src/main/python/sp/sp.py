@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import sys
+import os
+
 import sp_glob
 import sp_type
 from sp_ionc import ReadFile, WriteFile
@@ -52,7 +55,7 @@ class sp :
       self.RemoveInput=RemoveInput
 
    def once(self,InputFileName,OutFileNameIsPostfix=False) :
-      print 'WARNING 5 : possible improvement if data to read is reduced to the min size'
+      print >>sys.stderr, 'WARNING 5 : possible improvement if data to read is reduced to the min size'
       #print self.LonMinMax,self.LatMinMax
 
       InApp=ReadFile(InputFileName,self.InputVariableName,self.LonMinMax,self.LatMinMax,self.OutputLayer,self.RemoveInput)
@@ -68,7 +71,8 @@ class sp :
       if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
 
       if OutFileNameIsPostfix :
-         OutFileName=InputFileName+self.OutFileName
+         import os
+         OutFileName=os.getcwd()+'/'+os.path.basename(InputFileName)+self.OutFileName
       else :
          OutFileName=self.OutFileName
       WriteFile(self.OutApp,OutFileName)
@@ -78,7 +82,7 @@ class sp :
       return OutFileName
 
    def loop_go(self,InputFileName) :
-      print 'WARNING 6 : possible improvement if data to read is reduced'
+      print >>sys.stderr, 'WARNING 6 : possible improvement if data to read is reduced'
       #print self.LonMinMax,self.LatMinMax
 
       InApp=ReadFile(InputFileName,self.InputVariableName,self.LonMinMax,self.LatMinMax,self.OutputLayer,self.RemoveInput)
@@ -100,7 +104,7 @@ class sp :
                self.OutApp.operator_tAdd(InApp,self.TimeAverage)
             else :
                self.CatList.append(InApp)
-               print 'WARNING 15 : not able to handle this case now : concatenation postponed'
+               print >>sys.stderr, 'WARNING 15 : not able to handle this case now : concatenation postponed'
       
 #      print 'TGH :',self.OutApp.TimeCells,InApp.TimeCells
 #      if self.TimeAverage : 
@@ -133,15 +137,16 @@ class sp :
                else :
                   self.CatList.append(InApp)
       if len(self.CatList) != 0 : print 'ERROR 1 : wrong input'
-      print 'WARNING 1: something to improve...'  # in ch ordine tclose e operator_s
+      print >>sys.stderr, 'WARNING 1: something to improve...'  # in ch ordine tclose e operator_s
       if self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) :
          self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
       #print 'XXX lc',self.OutApp.COSM.shape
       if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
+      import os
       WriteFile(self.OutApp,self.OutFileName)
       if self.bm : sp_bm.bm_update(sp_bm.BM_WRITE,self.OutApp.COSM)
       self.OutApp=None
-      return self.OutFileName
+      return os.getcwd()+'/'+self.OutFileName
 
 
 
@@ -257,19 +262,40 @@ class tag_op :
 
 
 def EchoInputFile(text) :
-   print 'Input File  :',text
+   print >>sys.stderr, 'Input File  :',text
 
 def EchoOutputFile(text) :
-   print 'Output File :',text
+   print text
+   print >>sys.stderr, 'Output File :',text
 
 def NoneOrList(ar) :
    if ar is None : return None
    return ar.tolist()
 
+
+def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
+   import sys
+   if type == "stream" :
+      stream=open(InitFileName)
+      InputFileName=GetLine(keyPattern,stream)
+   else :
+      InputFileName=InitFileName
+      stream=sys.stdin
+   one=False
+   while InputFileName :
+      one=True
+      EchoInputFile(InputFileName)
+      my_sp.loop_go(InputFileName)
+      InputFileName=GetLine(keyPattern,stream)
+   if one :
+      output_name=my_sp.loop_close()
+      EchoOutputFile(output_name)
+
+
 def main():
    import re
    sp_bm.bm_setup()
-   print "sp.py"
+   print >>sys.stderr, "sp.py"
 
    opt=tag_op()
 
@@ -283,34 +309,34 @@ def main():
    Many2One=(opt.InFile == 'list') and ( TimeAverage or opt.otc is not None )
    Many2Many=(opt.InFile == 'list') and not TimeAverage and opt.otc is None
 
-   print "\nInput"
-   print " Input File/s    : ", opt.InFile
-   print " Selection Key   : ", opt.iKey
-   print "\nWorking Domain"
-   print " Variable/s      : ", opt.Variables
-   print " Time Range      :  None"
-   print " Depth Range     :  None"
-   print " Lon x Lat Range : ", NoneOrList(opt.LonLat)    #.tolist()
-   print "\nComputation"
-   print " Grid - Time      : ", opt.oat
-   print " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
-   print " Grid - Lon x Lat : ", opt.oao
-   print "\nOutput"
+   print >>sys.stderr, "\nInput"
+   print >>sys.stderr, " Input File/s    : ", opt.InFile
+   print >>sys.stderr, " Selection Key   : ", opt.iKey
+   print >>sys.stderr, "\nWorking Domain"
+   print >>sys.stderr, " Variable/s      : ", opt.Variables
+   print >>sys.stderr, " Time Range      :  None"
+   print >>sys.stderr, " Depth Range     :  None"
+   print >>sys.stderr, " Lon x Lat Range : ", NoneOrList(opt.LonLat)    #.tolist()
+   print >>sys.stderr, "\nComputation"
+   print >>sys.stderr, " Grid - Time      : ", opt.oat
+   print >>sys.stderr, " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
+   print >>sys.stderr, " Grid - Lon x Lat : ", opt.oao
+   print >>sys.stderr, "\nOutput"
    if Many2Many : 
-      print " File             : [InputFile]+", opt.OutFile
+      print >>sys.stderr, " File             : [InputFile]+", opt.OutFile
    else :
-      print " File             : ", opt.OutFile
-   print "\nBehaviour--------"
-   print "\nWhich Operation"
-   print " average over vertical space  :",VSpaceAverage
-   print " average over orizontal space :",OSpaceAverage
-   print " average over time            :",TimeAverage
-   print "\nWhich I/O Flow Schema"
-   print " many to many :",Many2Many
-   print " many to one  :",Many2One
-   print " one to one   :",One2One
-   print "\n"
-   print "\nExecution-------"
+      print >>sys.stderr, " File             : ", opt.OutFile
+   print >>sys.stderr, "\nBehaviour--------"
+   print >>sys.stderr, "\nWhich Operation"
+   print >>sys.stderr, " average over vertical space  :",VSpaceAverage
+   print >>sys.stderr, " average over orizontal space :",OSpaceAverage
+   print >>sys.stderr, " average over time            :",TimeAverage
+   print >>sys.stderr, "\nWhich I/O Flow Schema"
+   print >>sys.stderr, " many to many :",Many2Many
+   print >>sys.stderr, " many to one  :",Many2One
+   print >>sys.stderr, " one to one   :",One2One
+   print >>sys.stderr, "\n"
+   print >>sys.stderr, "\nExecution-------"
 
    if opt.iKey is not None :
       keyPattern=re.compile(opt.iKey)
@@ -319,23 +345,31 @@ def main():
 
    if opt.bm : sp_bm.bm_update(sp_bm.BM_INIT)
 
-   my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+   #my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
 
    # many files to one file
    if Many2One : 
-      one=False
+      #one=False
       InputFileName=GetLine(keyPattern)
-      while InputFileName :
-         one=True 
-         EchoInputFile(InputFileName)
-         my_sp.loop_go(InputFileName)
-         InputFileName=GetLine(keyPattern)
-      if one :
-         OutputFileName=my_sp.loop_close()
-         EchoOutputFile(OutputFileName)
-
+      if InputFileName :
+         if InputFileName[-4:]==".txt" :
+            while InputFileName :
+               #one=True
+               print >>sys.stderr, "Processing group..."+InputFileName 
+               EchoInputFile(InputFileName)
+               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+               Many2OneBlock(my_sp,InputFileName,None,type="stream")
+               InputFileName=GetLine(keyPattern)
+            #if one :
+            #OutputFileName=my_sp.loop_close()
+            #EchoOutputFile(OutputFileName)
+         else : #in this case must be InputFileName[-3:]==".nc"
+            print >>sys.stderr, "Processing simple..."
+            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+            Many2OneBlock(my_sp,InputFileName,keyPattern)
    # many files to many files
    elif Many2Many : 
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
       InputFileName=GetLine(keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
@@ -345,6 +379,7 @@ def main():
 
    # one file to one file
    elif One2One : 
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
       InputFileName=opt.InFile
       EchoInputFile(InputFileName)
       OutputFileName=my_sp.once(InputFileName)
@@ -352,7 +387,7 @@ def main():
 
    #nothing
    else :
-      print "Nothing to do"
+      print >>sys.stderr, "Nothing to do"
 
    #if sp_glob.verbose : print 'Out[0,0,88,0]=',my_sp.COSM[0,0,88,0], type(my_sp.COSM[0,0,88,0]), repr(my_sp.COSM[0,0,88,0]),my_sp.COSM[:,:,88,0]
 

@@ -1,0 +1,9 @@
+execution example :
+time cat inputfiles9 | ./ser_wf/workflow.sh
+
+/home/melodies-wp6/ncpi/scratch/node_o_m/out6.nc
+
+real	1m33.033s
+user	1m22.173s
+sys	0m5.689s
+
