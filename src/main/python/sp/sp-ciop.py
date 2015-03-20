@@ -39,12 +39,12 @@ def PutOutput(output_name, RemoveOutput=False, par_metalink=False) :
    if RemoveOutput : os.remove(output_name)
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
 
-def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
+def Many2OneBlock (sp_bm,my_sp,InitFileName,keyPattern,type=None) :
    import sys
    if type == "stream" :
       #print "type="+type+", Processing stream..."
       stream=open(InitFileName) 
-      InputFileName=sp.GetLine(keyPattern,stream)
+      InputFileName=sp.GetLine(sp_bm,keyPattern,stream)
       #print "InputFileName="+InputFileName
    else : 
       #print "type="+type+", Processing single..."
@@ -57,7 +57,7 @@ def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
       sp.EchoInputFile(LocalInputFileName)
       my_sp.loop_go(LocalInputFileName)
       #os.remove(LocalInputFileName)
-      InputFileName=sp.GetLine(keyPattern,stream)
+      InputFileName=sp.GetLine(sp_bm,keyPattern,stream)
    if one :
       output_name=my_sp.loop_close()
       PutOutput(output_name, par_metalink=True)
@@ -150,7 +150,7 @@ def main():
 
    if Many2One :
       #one=False
-      InputFileName=sp.GetLine(keyPattern)
+      InputFileName=sp.GetLine(opt['bm'],keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
             while InputFileName :
@@ -158,15 +158,15 @@ def main():
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
                my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
-               Many2OneBlock(my_sp,LocalInputFileName,None,type="stream") 
-               InputFileName=sp.GetLine(keyPattern)
+               Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
+               InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
             my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
-            Many2OneBlock(my_sp,InputFileName,keyPattern)
+            Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
       my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
-      InputFileName=sp.GetLine(keyPattern)
+      InputFileName=sp.GetLine(opt['bm'],keyPattern)
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)
          sp.EchoInputFile(LocalInputFileName)
@@ -174,7 +174,7 @@ def main():
          #os.remove(LocalInputFileName)
          PutOutput(output_name,RemoveOutput=opt['iClean'])
          sp.EchoOutputFile(output_name)
-         InputFileName=sp.GetLine(keyPattern)
+         InputFileName=sp.GetLine(opt['bm'],keyPattern)
 
    #elif One2One :
    #   InputFileName=opt['InFile']

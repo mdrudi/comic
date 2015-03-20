@@ -19,5 +19,13 @@ while read filename; do
    else :
       ln -fs $filename
       echo $PWD/`basename $filename`
-   fi
+      fi
+
+   numfile=`ls -1 | wc -l`
+   while [ $numfile -gt 31 ]; do
+      echo $numfile >> err.txt
+      sleep 10
+      numfile=`ls -1 | wc -l`
+      done
+
    done

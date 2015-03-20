@@ -174,17 +174,23 @@ class Params(object):
                data = row[1].replace(" ","").replace("\r","").replace("\n","")  # rest of row is data list
                self.__dict__[label] = data #values if len(values) > 1 else values[0]
 
-def GetLine(keyPattern=None,stream=None) :
+def GetLine(opt_bm,keyPattern=None,stream=None) :
    import sys
    import re
    if stream is None : stream=sys.stdin
-   a=stream.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+   if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
+   a=stream.readline()      #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+   if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
+   a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
    while a != '' :
       good=False
       if keyPattern is None : good=True
       elif re.search(keyPattern,a) is not None : good=True
       if good : return a
-      a=stream.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+      if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
+      a=stream.readline()         #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+      if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
+      a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
    return False
 
 
@@ -266,6 +272,7 @@ def EchoInputFile(text) :
 
 def EchoOutputFile(text) :
    print text
+   sys.stdout.flush
    print >>sys.stderr, 'Output File :',text
 
 def NoneOrList(ar) :
@@ -273,11 +280,11 @@ def NoneOrList(ar) :
    return ar.tolist()
 
 
-def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
+def Many2OneBlock (opt_bm,my_sp,InitFileName,keyPattern,type=None) :
    import sys
    if type == "stream" :
       stream=open(InitFileName)
-      InputFileName=GetLine(keyPattern,stream)
+      InputFileName=GetLine(opt_bm,keyPattern,stream)
    else :
       InputFileName=InitFileName
       stream=sys.stdin
@@ -286,7 +293,7 @@ def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
       one=True
       EchoInputFile(InputFileName)
       my_sp.loop_go(InputFileName)
-      InputFileName=GetLine(keyPattern,stream)
+      InputFileName=GetLine(opt_bm,keyPattern,stream)
    if one :
       output_name=my_sp.loop_close()
       EchoOutputFile(output_name)
@@ -294,6 +301,7 @@ def Many2OneBlock (my_sp,InitFileName,keyPattern,type=None) :
 
 def main():
    import re
+   #import time   #test to use time.sleep
    sp_bm.bm_setup()
    print >>sys.stderr, "sp.py"
 
@@ -350,7 +358,7 @@ def main():
    # many files to one file
    if Many2One : 
       #one=False
-      InputFileName=GetLine(keyPattern)
+      InputFileName=GetLine(opt.bm,keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
             while InputFileName :
@@ -358,24 +366,25 @@ def main():
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
                my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
-               Many2OneBlock(my_sp,InputFileName,None,type="stream")
-               InputFileName=GetLine(keyPattern)
+               Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream")
+               InputFileName=GetLine(opt.bm,keyPattern)
             #if one :
             #OutputFileName=my_sp.loop_close()
             #EchoOutputFile(OutputFileName)
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
             my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
-            Many2OneBlock(my_sp,InputFileName,keyPattern)
+            Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern)
    # many files to many files
    elif Many2Many : 
       my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
-      InputFileName=GetLine(keyPattern)
+      InputFileName=GetLine(opt.bm,keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
          OutputFileName=my_sp.once(InputFileName,OutFileNameIsPostfix=True)
          EchoOutputFile(OutputFileName)
-         InputFileName=GetLine(keyPattern)
+         #time.sleep(1)
+         InputFileName=GetLine(opt.bm,keyPattern)
 
    # one file to one file
    elif One2One : 

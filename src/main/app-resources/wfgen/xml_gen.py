@@ -137,16 +137,16 @@ sPar(defaultParameters,'s','True')
 sPar(defaultParameters,'iClean','True')
 
 
-defaultJobconf=ET.SubElement(jobTemplate,'defaultJobconf')
-defaultJobconf.text='\n'
-defaultJobconf.tail='\n'
-
-#myRange=range(startYear,endYear+1)
-
-property=ET.SubElement(defaultJobconf,'property')
-property.set('id','ciop.job.max.tasks')
-property.text=str((endYear-startYear)*12+endMonth)
-property.tail='\n'
+#defaultJobconf=ET.SubElement(jobTemplate,'defaultJobconf')
+#defaultJobconf.text='\n'
+#defaultJobconf.tail='\n'
+#
+##myRange=range(startYear,endYear+1)
+#
+#property=ET.SubElement(defaultJobconf,'property')
+#property.set('id','ciop.job.max.tasks')
+#property.text=str((endYear-startYear)*12+endMonth)
+#property.tail='\n'
 
 #jt_o
 

@@ -40,10 +40,11 @@ def GiveOutFile(myGroup,GroupRange,lib,Dump=False) :
          print >>sys.stderr, "Dump "+os.getcwd()+'/'+out_file_name
       else :
          try :
-            print >>sys.stderr, "Publishing by ciop", out_file_name
+            print >>sys.stderr, "Publishing output by ciop", out_file_name
             ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
          except : print >>sys.stderr, "Issue to plublish by ciop"
          print os.getcwd()+'/'+out_file_name
+         sys.stdout.flush()
 
 
 def main():
@@ -78,14 +79,15 @@ def main():
          list_files=list()
          list_files.append(InputPathFileName)
          lib[myGroup]=list_files
-      print >>sys.stderr, myGroup,InputFileName,InputPathFileName
+      print >>sys.stderr, "Input ",InputPathFileName
+      print >>sys.stderr, myGroup,InputFileName
       DoIt=False
       if GroupRange==6 :
          if len(lib[myGroup]) == monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1] : DoIt=True
       else : #here is GroupRange=4
-         nyyyy=365
-         if isleap(int(myGroup[0:4])) : nyyyy=366
-         if len(lib[myGroup]) == nyyyy : DoIt=True
+         #nyyyy=365
+         #if isleap(int(myGroup[0:4])) : nyyyy=366
+         if len(lib[myGroup]) == 12 : DoIt=True
       if DoIt : 
          GiveOutFile(myGroup,GroupRange,lib)
          del lib[myGroup]
