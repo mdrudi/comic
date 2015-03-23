@@ -71,7 +71,7 @@ def bm_update(type,data=None) :
 
 
 
-def bm_close() :
+def bm_close(NomeFile="bm.txt") :
    import sys
    global bminfo
    tot=bminfo['t_init']+bminfo['t_read']+bminfo['t_compute']+bminfo['t_write']+bminfo['t_bm']+bminfo['t_wrap']
@@ -102,7 +102,7 @@ def bm_close() :
    print >>sys.stderr, '\nIdle         : (ms)',int(bminfo['t_idle']),'-',int(round(bminfo['t_idle']/tot100)),'%\n'
 
    import json
-   json.dump(bminfo,open('bm.txt','w'))
+   json.dump(bminfo,open(NomeFile,'w'))
 
 
 

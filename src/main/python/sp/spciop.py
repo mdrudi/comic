@@ -187,9 +187,8 @@ def main():
       print "Nothing to do"
 
    if opt['bm'] : 
-      sp_bm.bm_close()
       pathname=os.environ['TMPDIR']+'/bm.txt_'+os.environ['mapred_task_id']
-      os.rename('bm.txt',pathname)
+      sp_bm.bm_close(pathname)
       ciop.publish(pathname)
 
 
