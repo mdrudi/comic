@@ -7,6 +7,7 @@ import sp_glob
 import sp_type
 from sp_ionc import ReadFile, WriteFile
 import sp_bm
+import mr
 
 sp_glob.verbose=False
 
@@ -177,21 +178,29 @@ class Params(object):
 def GetLine(opt_bm,keyPattern=None,stream=None) :
    import sys
    import re
-   if stream is None : stream=sys.stdin
-   if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
-   a=stream.readline()      #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-   if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
-   a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-   while a != '' :
-      good=False
-      if keyPattern is None : good=True
-      elif re.search(keyPattern,a) is not None : good=True
-      if good : return a
+   if stream is None :
       if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
-      a=stream.readline()         #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+      a=mymr.PullRecord(keyPattern)
+      if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
+      return a
+   else :
+      if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
+      a=stream.readline()      #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
       if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
       a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-   return False
+      if a != '' : return a
+      else : return False
+# whether read from file, non need of keyPattern
+#      while a != '' :
+#         good=False
+#         if keyPattern is None : good=True
+#         elif re.search(keyPattern,a) is not None : good=True
+#         if good : return a
+#         if opt_bm : sp_bm.bm_update(sp_bm.BM_INIT)
+#         a=stream.readline()         #.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+#         if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
+#         a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+#      return False
 
 
 class tag_op :
@@ -270,9 +279,13 @@ class tag_op :
 def EchoInputFile(text) :
    print >>sys.stderr, 'Input File  :',text
 
+import mr
+mymr=mr.mr()
+
 def EchoOutputFile(text) :
-   print text
-   sys.stdout.flush
+   #print text
+   #sys.stdout.flush
+   mymr.PushRecord(text)
    print >>sys.stderr, 'Output File :',text
 
 def NoneOrList(ar) :
