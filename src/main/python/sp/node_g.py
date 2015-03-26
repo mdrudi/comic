@@ -2,34 +2,36 @@
 
 import sys
 import os
+import mr
+mymr=mr.mr()
 
 # import the ciop functtons (e.g. copy, log)
 import sys
 sys.path.append('/usr/lib/ciop/python/')
 import cioppy as ciop
 
-def GetLine(keyPattern=None) :
-   import sys
-   import re
-   a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-   while a != '' :
-      #print "checking ",a[-3:]+'f'
-      good=False
-
-      if keyPattern is None : good=True
-      elif re.search(keyPattern,a) is not None : good=True
-
-      if good : return a
-      print >>sys.stderr, "Dump ",a
-      a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-
-   return False
+#def GetLine(keyPattern=None) :
+#   import sys
+#   import re
+#   a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+#   while a != '' :
+#      #print "checking ",a[-3:]+'f'
+#      good=False
+#
+#      if keyPattern is None : good=True
+#      elif re.search(keyPattern,a) is not None : good=True
+#
+#      if good : return a
+#      print >>sys.stderr, "Dump ",a
+#      a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
+#
+#   return False
 
 
 
 lib=dict()
 
-def GiveOutFile(myGroup,GroupRange,lib,Dump=False) :
+def GiveOutFile(myGroup,GroupRange,lib,Dump=False,key=None) :
       out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
       out_file = open(out_file_name,"w")
       print >>sys.stderr, out_file_name
@@ -43,7 +45,9 @@ def GiveOutFile(myGroup,GroupRange,lib,Dump=False) :
             print >>sys.stderr, "Publishing output by ciop", out_file_name
             ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
          except : print >>sys.stderr, "Issue to plublish by ciop"
-         print os.getcwd()+'/'+out_file_name
+         #print os.getcwd()+'/'+out_file_name
+         if key is None : mymr.PushRecord(os.getcwd()+'/'+out_file_name)
+         else : mymr.PushRecord(os.getcwd()+'/'+out_file_name,(key,))
          sys.stdout.flush()
 
 
@@ -62,13 +66,19 @@ def main():
       print >>sys.stderr, "Read iKey"
       GroupRange=int(ciop.getparam('GroupRange'))
       print >>sys.stderr, "Read GroupRange"
+      oKey=ciop.getparam('oKey')
+      print >>sys.stderr, "Read oKey"
+      if oKey == 'None' : oKey=None
    except : 
-      iKey=None
-      GroupRange=int(sys.argv[1]) #6
+      iKey=sys.argv[1]
+      GroupRange=int(sys.argv[2]) #6
+      oKey=sys.argv[3]
    print >>sys.stderr, "iKey: ",iKey
    print >>sys.stderr, "GroupRange (6-> month,4->year):"+str(GroupRange)
+   print >>sys.stderr, "oKey: ",oKey
 
-   InputPathFileName=GetLine(iKey)
+   #InputPathFileName=GetLine(iKey)
+   InputPathFileName=mymr.PullValue(iKey)
    while InputPathFileName :
       InputFileName=os.path.basename(InputPathFileName)      
       myGroup=InputFileName[0:GroupRange]
@@ -89,9 +99,10 @@ def main():
          #if isleap(int(myGroup[0:4])) : nyyyy=366
          if len(lib[myGroup]) == 12 : DoIt=True
       if DoIt : 
-         GiveOutFile(myGroup,GroupRange,lib)
+         GiveOutFile(myGroup,GroupRange,lib,key=oKey)
          del lib[myGroup]
-      InputPathFileName=GetLine(iKey)
+      #InputPathFileName=GetLine(iKey)
+      InputPathFileName=mymr.PullValue(iKey)
 
    for myGroup in lib.keys() :
       GiveOutFile(myGroup,GroupRange,lib,Dump=True)

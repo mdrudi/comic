@@ -7,7 +7,7 @@ map_ta() {
    cd map_ta
    exec 2> err.txt
    echo "map_ta start "`date` > log.txt
-   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --oat --ofile=.out.nc -s --bm
+   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=list_year --oat --ofile=.out.nc --okey=outcome -s --bm
    echo "map_ta end "`date` >> log.txt
    }
 
@@ -16,7 +16,7 @@ reduce_oa() {
    cd reduce_oa
    exec 2> err.txt
    echo "reduce_oa start "`date` > log.txt
-   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --oao --otc --ofile=out4.nc --bm
+   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=outcome --oao --otc --ofile=out4.nc --okey=outcome --bm
    echo "reduce_oa end "`date` >> log.txt
    }
 

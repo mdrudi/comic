@@ -97,6 +97,7 @@ defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
 sPar(defaultParameters,'iKey','.nc$')
+sPar(defaultParameters,'oKey','None')
 
 defaultJobconf=ET.SubElement(jobTemplate,'defaultJobconf')
 defaultJobconf.text='\n'
@@ -198,10 +199,10 @@ workflowVersion=ET.SubElement(workflow,'workflowVersion')
 workflowVersion.text='1.0'
 workflowVersion.tail='\n'
 
-# node_v
+# vg_m_v
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_v')
+node.set('id','vg_m_v')
 node.text='\n'
 node.tail='\n'
 
@@ -220,10 +221,10 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-# node_g_m
+# vg_r_gm
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_g_m')
+node.set('id','vg_r_gm')
 node.text='\n'
 node.tail='\n'
 
@@ -235,7 +236,7 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_v'
+source.text='vg_m_v'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
@@ -244,7 +245,7 @@ parameters.tail='\n'
 
 sPar(parameters,'GroupRange','6')
 
-# node_t_m
+# mtmg_m_tm
 
 #myRange=range(startYear,endYear+1)
 
@@ -254,7 +255,7 @@ sPar(parameters,'GroupRange','6')
 #      if i == endYear and m == endMonth : break
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_t_m')
+node.set('id','mtmg_m_tm')
 node.text='\n'
 node.tail='\n'
 
@@ -266,7 +267,7 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_g_m'
+source.text='vg_r_gm'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
@@ -276,10 +277,10 @@ parameters.tail='\n'
 #sPar(parameters,'OutFile','last'+strYYYYMM+'.nc')
 #sPar(parameters,'iKey','/'+strYYYYMM+'|^'+strYYYYMM)
 
-# node_g_a
+# mtmg_r_ga
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_g_a')
+node.set('id','mtmg_r_ga')
 node.text='\n'
 node.tail='\n'
 
@@ -291,7 +292,7 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_t_m'
+source.text='mtmg_m_tm'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
@@ -300,10 +301,10 @@ parameters.tail='\n'
 
 sPar(parameters,'GroupRange','4')
 
-# node_o_m 
+# mtmg_r_om 
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_o_m')
+node.set('id','mtmg_r_om')
 node.text='\n'
 node.tail='\n'
 
@@ -323,7 +324,7 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_t_m'
+source.text='mtmg_m_tm'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
@@ -333,10 +334,10 @@ parameters.tail='\n'
 sPar(parameters,'iKey','\.nc$')
 sPar(parameters,'OutFile','out6.nc')
 
-#node_t_a
+#mty_m_ta
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_t_a')
+node.set('id','mty_m_ta')
 node.text='\n'
 node.tail='\n'
 
@@ -348,17 +349,17 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_g_a'
+source.text='mtmg_r_ga'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-#node_o_a
+#mty_r_oa
 
 node=ET.SubElement(workflow,'node')
-node.set('id','node_o_a')
+node.set('id','mty_r_oa')
 node.text='\n'
 node.tail='\n'
 
@@ -378,12 +379,12 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_o_m'
+source.text='mtmg_r_om'
 source.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='node_t_a'
+source.text='mty_m_ta'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
