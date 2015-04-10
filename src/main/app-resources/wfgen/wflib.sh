@@ -21,6 +21,9 @@ gather() {
       prot=`echo $filename| cut -c 1-3`
       if [ "$prot" = "s3:" ]; then
          s3cmd get $filename >> log.txt
+      elif [ "$prot" = "ftp" ]; then
+         echo "ftp download $filename" >> log.txt
+         ncftpget -f $1 $filename >> log.txt
       else :
          prot="loc"
          fi

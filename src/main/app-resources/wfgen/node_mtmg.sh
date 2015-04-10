@@ -54,8 +54,8 @@ echo $NodeName" start "`date` > log.txt
 
 #pipe=localpipe
 #mkfifo $pipe
-#CloseOnQuit $pipe | reduce_ga &
-#map_tm | passer $pipe | passer outcome.txt | reduce_om >> outcome.txt &
+#CloseOnQuit $pipe | reduce_ga ; echo quit >> $pipe &
+#map_tm ; echo end | passer $pipe | passer outcome.txt | reduce_om >> outcome.txt &
 #echo quit >> $pipe    #does not work because when CloseOnQuit exit also reduce_ga is terminated
 #http://www.linuxjournal.com/content/using-named-pipes-fifos-bash
 
