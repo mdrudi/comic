@@ -71,17 +71,23 @@ def main():
       if oKey == 'None' : oKey=None
    except : 
       iKey=sys.argv[1]
-      GroupRange=int(sys.argv[2]) #6
+      GroupRange=int(sys.argv[2]) # default 6
+#      GroupTag=sys.argv[3]
       oKey=sys.argv[3]
    print >>sys.stderr, "iKey: ",iKey
-   print >>sys.stderr, "GroupRange (6-> month,4->year):"+str(GroupRange)
+   print >>sys.stderr, "GroupRange (6->year_month,4->year,2->month):"+str(GroupRange)
+#   print >>sys.stderr, "GroupTag: ",GroupTag
    print >>sys.stderr, "oKey: ",oKey
 
    #InputPathFileName=GetLine(iKey)
    InputPathFileName=mymr.PullValue(iKey)
    while InputPathFileName :
+      import re
       InputFileName=os.path.basename(InputPathFileName)      
-      myGroup=InputFileName[0:GroupRange]
+      if GroupRange==2 :
+         myGroup=InputFileName[4:6] 
+      else :
+         myGroup=InputFileName[0:GroupRange]
       if myGroup in lib.keys() :
          list_files=lib[myGroup]
          list_files.append(InputPathFileName)
@@ -94,7 +100,7 @@ def main():
       DoIt=False
       if GroupRange==6 :
          if len(lib[myGroup]) == monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1] : DoIt=True
-      else : #here is GroupRange=4
+      elif GroupRange==4 : #here is GroupRange=4
          #nyyyy=365
          #if isleap(int(myGroup[0:4])) : nyyyy=366
          if len(lib[myGroup]) == 12 : DoIt=True
@@ -105,7 +111,10 @@ def main():
       InputPathFileName=mymr.PullValue(iKey)
 
    for myGroup in lib.keys() :
-      GiveOutFile(myGroup,GroupRange,lib,Dump=True)
+      if GroupRange==2 :
+         GiveOutFile(myGroup,GroupRange,lib,key=oKey)
+      else :
+         GiveOutFile(myGroup,GroupRange,lib,Dump=True)
       #out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
       #out_file = open(out_file_name,"w")
       #print >>sys.stderr, out_file_name
