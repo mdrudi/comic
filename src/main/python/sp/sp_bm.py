@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/anaconda/bin/python
 
 BM_INIT=1
 BM_READ=2

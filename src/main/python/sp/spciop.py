@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/anaconda/bin/python
 
 import sp_bm
 import sp
