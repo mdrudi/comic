@@ -29,6 +29,8 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    import numpy
    import os
 
+   isClimatology=False
+
    MyDataset=netCDF4.Dataset(MyInputFile)
    print >>sys.stderr, 'WARNING 13 : now able to read only Med MFC file format, an important inprovement would be the ability to read bounds'
    MyDatasetVariable=MyDataset.variables[MyInputVariable]
@@ -50,6 +52,9 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
          #print MyDatasetTime.ncattrs()
          if 'bounds' in MyDatasetTime.ncattrs() : # MyDataset.variables[tV].bounds != '' :
             MyDatasetTimeBnds=MyDataset.variables[MyDataset.variables[tV].bounds]
+         elif 'climatology' in MyDatasetTime.ncattrs() :
+            MyDatasetTimeBnds=MyDataset.variables[MyDataset.variables[tV].climatology]
+            isClimatology=True
          else :
             MyDatasetTimeBnds=None
 
@@ -148,16 +153,21 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       TimeCells[TimeCells.size-1]=netCDF4.date2num(dtLast,units='hours since 1900-01-01 00:00:00',calendar='standard')
    else :
       dtTmp_bnds=netCDF4.num2date(MyDatasetTimeBnds[:,:],units=MyDatasetTime.units,calendar=MyDatasetTime.calendar)
-      TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
-      TimeCells[:TimeCells.size-1]=netCDF4.date2num(dtTmp_bnds[:,0],units='hours since 1900-01-01 00:00:00',calendar='standard')
-      TimeCells[-1]=netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard')
+      if isClimatology :
+         TimeCells=netCDF4.date2num(dtTmp_bnds,units='hours since 1900-01-01 00:00:00',calendar='standard')
+      else : 
+         TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
+         TimeCells[:TimeCells.size-1]=netCDF4.date2num(dtTmp_bnds[:,0],units='hours since 1900-01-01 00:00:00',calendar='standard')
+         TimeCells[-1]=netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard')
 ### READ DAILY FILE : END
 
    MyDataset.close()
    if RemoveInput : os.remove(MyInputFile)
 
    #print 'YYY',type(MyDatasetVariable),MyDatasetDepthLayer.size,MyDatasetVariable.shape
-   return sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
+   ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
+   if isClimatology : ChTMP.ClimatologicalField=True #setAsClimatologicalField()
+   return ChTMP
 
 
 
@@ -311,20 +321,23 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutT.axis='T'
    if cOut.ClimatologicalField : 
       tmpOutT.climatology="climatology_bnds"
+      tmpOutT[:]=cOut.TimeCells[:,0] #+12
+#      print cOut.TimeCells.shape
    else :
       tmpOutT.bounds='time_bnds'
-   tmpOutT[:]=cOut.TimeCells[:cOut.TimeCells.size-1] #+12
+      tmpOutT[:]=cOut.TimeCells[:cOut.TimeCells.size-1] #+12
 
    if cOut.ClimatologicalField :
       tmpOutTB=OutDataset.variables['climatology_bnds']
+      tmpOutTB[:,:]=cOut.TimeCells
    else :
       tmpOutTB=OutDataset.variables['time_bnds']
+      tmpOutTB[:,0]=cOut.TimeCells[:cOut.TimeCells.size-1]
+      tmpOutTB[:,1]=cOut.TimeCells[1:]
    tmpOutTB.units='hours since 1900-01-01 00:00:00'
    #tmpOutTB.units='seconds since 1900-01-01 00:00:00'
    #tmpOutTB.calendar='standard'
    #tmpOutTB.standard_name='time'
-   tmpOutTB[:,0]=cOut.TimeCells[:cOut.TimeCells.size-1]
-   tmpOutTB[:,1]=cOut.TimeCells[1:]
 
    #print cOut.TimeCells[:]
 

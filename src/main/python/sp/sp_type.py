@@ -63,6 +63,11 @@ class Characteristic :
       self.ClimatologicalField=False
 
    def setAsClimatologicalField(self) :
+      appo=self.TimeCells
+      #print type(self.TimeCells)
+      self.TimeCells=numpy.zeros((1,appo.size))
+      self.TimeCells[0]=appo
+      #print self.TimeCells
       self.ClimatologicalField=True
 
 #   def masked_as(In,OutLayer=None,OutLonLat=None) :
@@ -91,8 +96,27 @@ class Characteristic :
 #      return Characteristic(In.StandardName,In.VariableName,In.DepthLayers,In.LonCells,In.LatCells,In.TimeCells,ConcatenatioOfSpatialMaps=In.COSM)
 
    def IsAdiacent(self,Test) :
-      if self.TimeCells[-1] == Test.TimeCells[0] or self.TimeCells[0] == Test.TimeCells[1] :
-         return True
+      #print stc,ttc
+      if self.ClimatologicalField :
+         import netCDF4
+         import datetime
+         #print self.TimeCells,Test.TimeCells
+         stc=netCDF4.num2date(self.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
+         ttc=netCDF4.num2date(Test.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
+         #print stc,ttc
+         #if (stc[0].year == ttc[0].year and stc[1].year == ttc[1].year ) : 
+            #stc[1].year=ttc[0].year
+         nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,stc[-1][1].day,stc[-1][1].hour,stc[-1][1].minute)
+         nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,ttc[-1][1].day,ttc[-1][1].hour,ttc[-1][1].minute)
+         #print nttc
+#         if stc[0][0].year <= ttc[0][0].year and ( nstc==ttc[0][0] or nttc==stc[0][0] ) :
+         if ( nstc==ttc[0][0] and stc[0][0].year <= ttc[0][0].year ) or ( nttc==stc[0][0] and ttc[0][0].year <= stc[0][0].year ) :
+         #if self.TimeCells[0]+Test.TimeCells[1]-self.TimeCells[0]==Test.TimeCells[0] :
+            #print 'vero',stc[0][0].year,ttc[0][0].year
+            return True
+      else :
+         if self.TimeCells[-1] == Test.TimeCells[0] or self.TimeCells[0] == Test.TimeCells[1] :
+            return True
       return False 
 
    def mask_out_of(self,LonLatList) :
@@ -154,8 +178,12 @@ class Characteristic :
          print >>sys.stderr, "WARNING 7 : can't handle average over time in some cases : i.e. gap, different weights, ..."
          self.tCounter+=1
          #if self.tLastValidityTime is None : self.tLastValidityTime=In.TimeCells
-         if self.TimeCells[1] < In.TimeCells[1] : self.TimeCells[1]=In.TimeCells[1]
-         if self.TimeCells[0] > In.TimeCells[0] : self.TimeCells[0]=In.TimeCells[0]
+         if self.ClimatologicalField :
+            if self.TimeCells[0][1] < In.TimeCells[0][1] : self.TimeCells[0][1]=In.TimeCells[0][1]
+            if self.TimeCells[0][0] > In.TimeCells[0][0] : self.TimeCells[0][0]=In.TimeCells[0][0]
+         else :
+            if self.TimeCells[1] < In.TimeCells[1] : self.TimeCells[1]=In.TimeCells[1]
+            if self.TimeCells[0] > In.TimeCells[0] : self.TimeCells[0]=In.TimeCells[0]
          #print 'TUU',self.tLastValidityTime
          self.COSM+=app
       else :
@@ -170,16 +198,41 @@ class Characteristic :
 #            #print 'AVF1',type(self.COSM),self.COSM.count()
 #         else :
             #print 'AVF2',type(app),app.count()
-         if self.TimeCells[-1] == In.TimeCells[0] :
-            self.TimeCells=numpy.concatenate((self.TimeCells,[In.TimeCells[1]]),axis=0)
-            #print 'SHA :',self.COSM.shape,app.shape
-            self.COSM=numpy.ma.concatenate((self.COSM,app),axis=0)
-         elif self.TimeCells[0] == In.TimeCells[1] :
-            self.TimeCells=numpy.concatenate(([In.TimeCells[0]],self.TimeCells),axis=0)
-            self.COSM=numpy.ma.concatenate((app,self.COSM),axis=0)
-            #print 'AVF3',type(self.COSM),self.COSM.count()
-         else :
-            print >>sys.stderr, 'ERROR 2 : not possible to concatenate'
+
+         if self.ClimatologicalField :
+            import netCDF4
+            import datetime
+            #print self.TimeCells,Test.TimeCells
+            stc=netCDF4.num2date(self.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
+            ttc=netCDF4.num2date(In.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
+            #nstc=datetime.datetime(ttc[0].year,stc[1].month,stc[1].day,stc[1].hour,stc[1].minute)
+            #nttc=datetime.datetime(stc[0].year,ttc[1].month,ttc[1].day,ttc[1].hour,ttc[1].minute)
+            nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,stc[-1][1].day,stc[-1][1].hour,stc[-1][1].minute)
+            nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,ttc[-1][1].day,ttc[-1][1].hour,ttc[-1][1].minute)
+            if nstc==ttc[0][0] and stc[0][0].year <= ttc[0][0].year :
+               self.TimeCells=numpy.concatenate((self.TimeCells,In.TimeCells),axis=0)
+               self.COSM=numpy.ma.concatenate((self.COSM,app),axis=0)
+            elif nttc==stc[0][0] and ttc[0][0].year <= stc[0][0].year :
+               self.TimeCells=numpy.concatenate((In.TimeCells,self.TimeCells),axis=0)
+               self.COSM=numpy.ma.concatenate((app,self.COSM),axis=0)
+            else : print >>sys.stderr, 'ERROR 3 : not possible to concatenate'
+            #print self.TimeCells
+
+         #if self.ClimatologicalField :
+         #   if self.TimeCells[0]+In.TimeCells[1]-self.TimeCells[0]==In.TimeCells[0] :
+         #      self.TimeCells=numpy.concatenate((self.TimeCells,[In.TimeCells[1]]),axis=0)
+         #      self.COSM=numpy.ma.concatenate((self.COSM,app),axis=0) 
+         else : 
+            if self.TimeCells[-1] == In.TimeCells[0] :
+               self.TimeCells=numpy.concatenate((self.TimeCells,[In.TimeCells[1]]),axis=0)
+               #print 'SHA :',self.COSM.shape,app.shape
+               self.COSM=numpy.ma.concatenate((self.COSM,app),axis=0)
+            elif self.TimeCells[0] == In.TimeCells[1] :
+               self.TimeCells=numpy.concatenate(([In.TimeCells[0]],self.TimeCells),axis=0)
+               self.COSM=numpy.ma.concatenate((app,self.COSM),axis=0)
+               #print 'AVF3',type(self.COSM),self.COSM.count()
+            else :
+               print >>sys.stderr, 'ERROR 2 : not possible to concatenate'
       #print 'AVF',type(self.COSM),self.COSM.count()
       #print self.tLastValidityTime
 

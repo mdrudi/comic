@@ -100,6 +100,7 @@ class sp :
 #         print 'aaaaaaaaaaaaa',self.OutApp.ClimatologicalField
       else :
          if self.TimeAverage :
+            if self.ClimatologicalAverage : InApp.setAsClimatologicalField()
             self.OutApp.operator_tAdd(InApp,self.TimeAverage)
          else :
             if self.LonLat is not None : InApp.mask_out_of(self.LonLat)
@@ -396,7 +397,7 @@ def main():
             #EchoOutputFile(OutputFileName)
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
-            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean )
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 
