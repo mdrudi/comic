@@ -201,7 +201,10 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    OutDataset.createVariable('depth_bnds','f4',('depth','nv'),zlib=True,complevel=9)
    OutDataset.createVariable('lon_bnds','f4',('lon','nv'),zlib=True,complevel=9)
    OutDataset.createVariable('lat_bnds','f4',('lat','nv'),zlib=True,complevel=9)
-   OutDataset.createVariable('time_bnds','i4',('time','nv'))
+   if cOut.ClimatologicalField :
+      OutDataset.createVariable('climatology_bnds','i4',('time','nv'))
+   else :
+      OutDataset.createVariable('time_bnds','i4',('time','nv'))
    OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
 
    tmpOutTemp=OutDataset.variables[cOut.VariableName]
@@ -210,6 +213,7 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutTemp.valid_min=numpy.float32(math.floor(Out.min()))
    tmpOutTemp.valid_max=numpy.float32(math.ceil(Out.max()))
    tmpOutTemp.missing_value=Out.fill_value
+   if cOut.ClimatologicalField : tmpOutTemp.cell_methods="time: sum within years time: mean over years"
    if cOut.StandardName == 'sea_water_potential_temperature' :
       tmpOutTemp.units="degC"
    tmpOutTemp[:,:,:,:]=Out
@@ -305,10 +309,17 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutT.long_name='time'
    tmpOutT.standard_name='time'
    tmpOutT.axis='T'
-   tmpOutT.bounds='time_bnds'
+   if cOut.ClimatologicalField : 
+      tmpOutT.climatology="climatology_bnds"
+   else :
+      tmpOutT.bounds='time_bnds'
    tmpOutT[:]=cOut.TimeCells[:cOut.TimeCells.size-1] #+12
 
-   tmpOutTB=OutDataset.variables['time_bnds']
+   if cOut.ClimatologicalField :
+      tmpOutTB=OutDataset.variables['climatology_bnds']
+   else :
+      tmpOutTB=OutDataset.variables['time_bnds']
+   tmpOutTB.units='hours since 1900-01-01 00:00:00'
    #tmpOutTB.units='seconds since 1900-01-01 00:00:00'
    #tmpOutTB.calendar='standard'
    #tmpOutTB.standard_name='time'

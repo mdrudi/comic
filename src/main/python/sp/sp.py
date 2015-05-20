@@ -17,7 +17,7 @@ sp_glob.verbose=False
 
 
 class sp :
-   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,RemoveInput=False) :
+   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False) :
 
       self.OutApp=None
 
@@ -47,6 +47,7 @@ class sp :
       self.OutFileName=OutFileName
       self.OutLonLat=OutLonLat
       self.TimeAverage=TimeAverage
+      self.ClimatologicalAverage=ClimatologicalAverage
 
       #behaviour flags
       self.bm=bm
@@ -95,6 +96,8 @@ class sp :
          if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
          if not ( self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) ) :
             self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
+         if self.ClimatologicalAverage : self.OutApp.setAsClimatologicalField()
+#         print 'aaaaaaaaaaaaa',self.OutApp.ClimatologicalField
       else :
          if self.TimeAverage :
             self.OutApp.operator_tAdd(InApp,self.TimeAverage)
@@ -216,6 +219,7 @@ class tag_op :
       parser.add_option("--iClean",  dest="iClean",          default=False,    action="store_true", help="flag to remove the input file after reading")
       parser.add_option("--ofile",   dest="MyOutFile",       default="out.nc", metavar="OutFile",   help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
       parser.add_option("--oat",     dest="oat",             default=None,     action="store_true", help="flag to activate the computation of average value over time")
+      parser.add_option("--oac",     dest="oac",             default=None,     action="store_true", help="flag to activate the computation of climatological average value over time")
       parser.add_option("--oav",     dest="oav",             default=None,     metavar="OutLayer" , help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
       parser.add_option("--oao",     dest="oao",             default=None,     action="store_true", help="flag to activate the computation of average value over the spatial lon lat plane")
       parser.add_option("--otc",     dest="otc",             default=None,     action="store_true", help="flag to concatenate output along the time dimension into one single output file")
@@ -275,6 +279,7 @@ class tag_op :
       self.s=options.SpeedUp
       self.v=options.verbose
       self.oat=options.oat
+      self.oac=options.oac
       self.oKey=options.oKey
 
 
@@ -327,7 +332,7 @@ def main():
       sp_glob.verbose=True
    
    VSpaceAverage=(opt.OutLayer is not None) 
-   TimeAverage=(opt.oat is not None)
+   TimeAverage=(opt.oat is not None or opt.oac is not None)
    OSpaceAverage=(opt.oao is not None) 
    One2One=(opt.InFile != 'list')
    Many2One=(opt.InFile == 'list') and ( TimeAverage or opt.otc is not None )
@@ -343,6 +348,7 @@ def main():
    print >>sys.stderr, " Lon x Lat Range : ", NoneOrList(opt.LonLat)    #.tolist()
    print >>sys.stderr, "\nComputation"
    print >>sys.stderr, " Grid - Time      : ", opt.oat
+   print >>sys.stderr, " Grid - Climatological Time      : ", opt.oac
    print >>sys.stderr, " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
    print >>sys.stderr, " Grid - Lon x Lat : ", opt.oao
    print >>sys.stderr, "\nOutput"
@@ -382,7 +388,7 @@ def main():
                #one=True
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
-               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean )
                Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream",outputKey=opt.oKey)
                InputFileName=GetLine(opt.bm,keyPattern)
             #if one :

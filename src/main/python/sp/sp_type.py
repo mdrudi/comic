@@ -60,6 +60,10 @@ class Characteristic :
       self.tCounter=1
       #self.tLastValidityTime=None
       #self.tCOSM=None
+      self.ClimatologicalField=False
+
+   def setAsClimatologicalField(self) :
+      self.ClimatologicalField=True
 
 #   def masked_as(In,OutLayer=None,OutLonLat=None) :
 #      #print 'XXX',In.DepthLayers.size,In.COSM.shape
