@@ -8,7 +8,7 @@ map_tm() {
    cd map_tm
    exec 2> err.txt
    echo "map_tm start "`date` > log.txt
-   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=list_month --oat --ofile=.out.nc --okey=outcome -s --bm #--iClean
+   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=list_month --oat --ofile=.out.nc --okey=outcome_mmap -s --bm --iClean
    echo "map_tm end "`date` >> log.txt
    }
 
@@ -17,7 +17,7 @@ reduce_om() {
    cd reduce_om
    exec 2> err.txt
    echo "reduce_om start "`date` > log.txt
-   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=outcome --oao --otc --ofile=out6.nc --okey=outcome --bm
+   $cDir/jt_vto/runc.py --ifile list --ifield=votemper --ikey=outcome_mmap --oao --otc --ofile=out6.nc --okey=outcome_mts --bm
    echo "reduce_om end "`date` >> log.txt
    }
 
@@ -26,10 +26,18 @@ reduce_ga() {
    cd reduce_ga
    exec 2> err.txt
    echo "reduce_ga start "`date` > log.txt
-   $cDir/jt_vto/node_g.py outcome 4 list_year
+   $cDir/jt_vto/node_g.py outcome_mmap 4 list_year
    echo "reduce_ga end "`date` >> log.txt
    }
 
+reduce_gc() {
+   mkdir reduce_gc
+   cd reduce_gc
+   exec 2> err.txt
+   echo "reduce_gc start "`date` > log.txt
+   $cDir/jt_vto/node_g.py outcome_mmap 2 list_cmonth
+   echo "reduce_gc end "`date` >> log.txt
+   }
 
 
 CloseOnQuit() {
@@ -59,8 +67,10 @@ echo $NodeName" start "`date` > log.txt
 #echo quit >> $pipe    #does not work because when CloseOnQuit exit also reduce_ga is terminated
 #http://www.linuxjournal.com/content/using-named-pipes-fifos-bash
 
-map_tm | passer buffer.txt | reduce_om > outcome.txt
-cat buffer.txt | passer outcome.txt | reduce_ga
+map_tm | passer buffer.txt | reduce_gc
+cat buffer.txt | reduce_ga
+cat buffer.txt
+cat buffer.txt | reduce_om  #optional
 
 echo $NodeName" end "`date` >> log.txt
 
