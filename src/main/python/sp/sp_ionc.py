@@ -29,6 +29,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    import numpy
    import os
 
+   print >>sys.stderr, 'dbdbdbdb',MyInputFile
    MyDataset=netCDF4.Dataset(MyInputFile)
    print >>sys.stderr, 'WARNING 13 : now able to read only Med MFC file format, an important inprovement would be the ability to read bounds'
    MyDatasetVariable=MyDataset.variables[MyInputVariable]

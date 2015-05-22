@@ -7,11 +7,12 @@ import sp
 
 import site
 import os
-import sys
+#import sys
 
 # import the ciop functtons (e.g. copy, log)
-sys.path.append('/usr/lib/ciop/python/')
-import cioppy as ciop
+#sys.path.append('/usr/lib/ciop/python/')    #classic python, not anaconda
+import cioppy            #as ciop #classic python, not anaconda
+ciop = cioppy.Cioppy()   # anaconda
 
 def CheckNone(text) :
    if ( text == 'None' ) or ( text == '' ) :
@@ -26,8 +27,12 @@ def CheckNoneOrRange(text) :
 def GetInput(InputFileName) :
    ciop.log('INFO', 'input: ' + InputFileName)
    #print 'Input File Name :',InputFileName
+   import sys
+   print >>sys.stderr, 'dbdbdbdb gi InputFileName',InputFileName
    res = ciop.copy(InputFileName, os.environ['TMPDIR'])
-   LocalInputFileName = os.path.basename(res[0].rstrip('\n'))
+   print >>sys.stderr, 'dbdbdbdb gi res',res
+   # LocalInputFileName = os.path.basename(res[0].rstrip('\n')) #classic python, not anaconda
+   LocalInputFileName = os.path.basename(res) # anaconda
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
    return LocalInputFileName
 
@@ -148,6 +153,8 @@ def main():
 
    #my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
 
+   import sys
+
    if Many2One :
       #one=False
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
@@ -167,8 +174,10 @@ def main():
    elif Many2Many :
       my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
+      print >>sys.stderr, 'dbdbdbdb InputFileName',InputFileName
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)
+         print >>sys.stderr, 'dbdbdbdb LocalInputFileName',LocalInputFileName
          sp.EchoInputFile(LocalInputFileName)
          output_name=my_sp.once(LocalInputFileName,OutFileNameIsPostfix=True)
          #os.remove(LocalInputFileName)
