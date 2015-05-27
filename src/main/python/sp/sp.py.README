@@ -21,3 +21,8 @@ sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifiel
 sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10]' --bm -v --ilonlat='[[[12.75, 12.80], [44.5, 44.6]]]' -v
 
 sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --otc < ../inputfiles
+
+sp.py --ifile ../data_in/19870101_dm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,50,100,500,1000,2000]' --bm --iattr=attr.txt
+
+in attr.txt
+{"votemper": {"long_name": "monthly mean map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "monthly mean map","institution": "MELODIES WP6 ACS INGV"}}

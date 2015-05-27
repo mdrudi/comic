@@ -171,7 +171,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
 
 
 
-def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
+def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    import netCDF4
    import math
    import numpy
@@ -190,6 +190,7 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    OutDataset.Conventions = "CF-1.6"
 
    #print Out.shape
+   OutDataset.setncatts(AncillaryAttr)
    OutDataset.createDimension('time',None)
    OutDataset.createDimension('depth',Out.shape[1])
    OutDataset.createDimension('lat',Out.shape[2])
@@ -223,6 +224,9 @@ def WriteFile (cOut,OutFileName) :   #Out,DepthLayer) :
    tmpOutTemp.valid_min=numpy.float32(math.floor(Out.min()))
    tmpOutTemp.valid_max=numpy.float32(math.ceil(Out.max()))
    tmpOutTemp.missing_value=Out.fill_value
+   tmpOutTemp.setncatts(cOut.AncillaryAttr)
+#for item in cOut.AncillaryAttr :
+#      pass
    if cOut.ClimatologicalField : tmpOutTemp.cell_methods="time: sum within years time: mean over years"
    if cOut.StandardName == 'sea_water_potential_temperature' :
       tmpOutTemp.units="degC"

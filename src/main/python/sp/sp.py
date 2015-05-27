@@ -17,7 +17,7 @@ sp_glob.verbose=False
 
 
 class sp :
-   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False) :
+   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None) :
 
       self.OutApp=None
 
@@ -55,6 +55,10 @@ class sp :
       #self.sList=sList
       self.CatList=list()
       self.RemoveInput=RemoveInput
+      if AttrFile is not None :
+         import json
+         self.dAttrOut=json.load(open(AttrFile,'r'))
+      else : self.dAttrOut=dict()
 
    def once(self,InputFileName,OutFileNameIsPostfix=False) :
       print >>sys.stderr, 'WARNING 5 : possible improvement if data to read is reduced to the min size'
@@ -65,6 +69,7 @@ class sp :
       if self.bm : sp_bm.bm_update(sp_bm.BM_READ,InApp.COSM)
 
       self.OutApp=InApp
+      if self.InputVariableName in self.dAttrOut : self.OutApp.SetAttributes(self.dAttrOut[self.InputVariableName])
       if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
       if self.OutputLayer is not None or self.OutLonLat is not None :
          self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
@@ -77,7 +82,8 @@ class sp :
          OutFileName=os.getcwd()+'/'+os.path.basename(InputFileName)+self.OutFileName
       else :
          OutFileName=self.OutFileName
-      WriteFile(self.OutApp,OutFileName)
+      if 'global' in self.dAttrOut : WriteFile(self.OutApp,OutFileName,self.dAttrOut['global'])
+      else : WriteFile(self.OutApp,OutFileName)
       if self.bm : sp_bm.bm_update(sp_bm.BM_WRITE,self.OutApp.COSM)
 
       self.OutApp=None
@@ -213,22 +219,23 @@ class tag_op :
       import optparse
 
       parser = optparse.OptionParser()
-      parser.add_option("--ifile",   dest="MyInputFile",     default="none",   metavar="InFile",    help="read data from file InFile (netcdf format) ; if InFile='list' then read data from the list of files which names are passed in standard input") 
-      parser.add_option("--ifield",  dest="MyInputVariable", metavar="Var",    help="working variable to be read from input file/s")
-      parser.add_option("--ilonlat", dest="LonLat",          default=None,     metavar="LonLat",    help="optional - spatial working domain - default : the whole in input")
-      parser.add_option("--ikey",    dest="iKey",            default=None,     metavar="iKey",      help="optional - input selection mapreduce key/s")
-      parser.add_option("--iClean",  dest="iClean",          default=False,    action="store_true", help="flag to remove the input file after reading")
-      parser.add_option("--ofile",   dest="MyOutFile",       default="out.nc", metavar="OutFile",   help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
-      parser.add_option("--oat",     dest="oat",             default=None,     action="store_true", help="flag to activate the computation of average value over time")
-      parser.add_option("--oac",     dest="oac",             default=None,     action="store_true", help="flag to activate the computation of climatological average value over time")
-      parser.add_option("--oav",     dest="oav",             default=None,     metavar="OutLayer" , help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
-      parser.add_option("--oao",     dest="oao",             default=None,     action="store_true", help="flag to activate the computation of average value over the spatial lon lat plane")
-      parser.add_option("--otc",     dest="otc",             default=None,     action="store_true", help="flag to concatenate output along the time dimension into one single output file")
-      parser.add_option("--okey",    dest="oKey",            default=None,     metavar="oKey",      help="optional - output mapreduce key")
-      parser.add_option("-v",        dest="verbose",         default=False,    action="store_true", help="legacy - be verbose")
-      parser.add_option("-p",        dest="MyParameterFile", default='none',   metavar="ParFile",   help="legacy - alternative parameter file to provide var , lout, lon, lat")
-      parser.add_option("--bm",      dest="bm",              default=False,    action="store_true", help="print and save benchmarking information")
-      parser.add_option("-s",        dest="SpeedUp",         default=False,    action="store_true", help="might use more memory and improve the execution speed")
+      parser.add_option("--ifile",     dest="MyInputFile",     default="none",   metavar="InFile",       help="read data from file InFile (netcdf format) ; if InFile='list' then read data from the list of files which names are passed in standard input") 
+      parser.add_option("--ifield",    dest="MyInputVariable", metavar="Var",    help="working variable to be read from input file/s")
+      parser.add_option("--ilonlat",   dest="LonLat",          default=None,     metavar="LonLat",       help="optional - spatial working domain - default : the whole in input")
+      parser.add_option("--ikey",      dest="iKey",            default=None,     metavar="iKey",         help="optional - input selection mapreduce key/s")
+      parser.add_option("--iClean",    dest="iClean",          default=False,    action="store_true",    help="flag to remove the input file after reading")
+      parser.add_option("--iattr",     dest="AttrFile",        default=None,     metavar="AttrFile",     help="optional - template for metadata in output netcdf file")
+      parser.add_option("--ofile",     dest="MyOutFile",       default="out.nc", metavar="OutFile",      help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
+      parser.add_option("--oat",       dest="oat",             default=None,     action="store_true",    help="flag to activate the computation of average value over time")
+      parser.add_option("--oac",       dest="oac",             default=None,     action="store_true",    help="flag to activate the computation of climatological average value over time")
+      parser.add_option("--oav",       dest="oav",             default=None,     metavar="OutLayer" ,    help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
+      parser.add_option("--oao",       dest="oao",             default=None,     action="store_true",    help="flag to activate the computation of average value over the spatial lon lat plane")
+      parser.add_option("--otc",       dest="otc",             default=None,     action="store_true",    help="flag to concatenate output along the time dimension into one single output file")
+      parser.add_option("--okey",      dest="oKey",            default=None,     metavar="oKey",         help="optional - output mapreduce key")
+      parser.add_option("-v",          dest="verbose",         default=False,    action="store_true",    help="legacy - be verbose")
+      parser.add_option("-p",          dest="MyParameterFile", default='none',   metavar="ParFile",      help="legacy - alternative parameter file to provide var , lout, lon, lat")
+      parser.add_option("--bm",        dest="bm",              default=False,    action="store_true",    help="print and save benchmarking information")
+      parser.add_option("-s",          dest="SpeedUp",         default=False,    action="store_true",    help="might use more memory and improve the execution speed")
       (options, args) = parser.parse_args()
       #print options
       #print args
@@ -282,6 +289,7 @@ class tag_op :
       self.oat=options.oat
       self.oac=options.oac
       self.oKey=options.oKey
+      self.AttrFile=options.AttrFile
 
 
 def EchoInputFile(text) :
@@ -342,6 +350,7 @@ def main():
    print >>sys.stderr, "\nInput"
    print >>sys.stderr, " Input File/s    : ", opt.InFile
    print >>sys.stderr, " Selection Key   : ", opt.iKey
+   print >>sys.stderr, " Attribute File  : ", opt.AttrFile
    print >>sys.stderr, "\nWorking Domain"
    print >>sys.stderr, " Variable/s      : ", opt.Variables
    print >>sys.stderr, " Time Range      :  None"
@@ -401,7 +410,7 @@ def main():
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile)
       InputFileName=GetLine(opt.bm,keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
@@ -412,7 +421,7 @@ def main():
 
    # one file to one file
    elif One2One : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean )
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile)
       InputFileName=opt.InFile
       EchoInputFile(InputFileName)
       OutputFileName=my_sp.once(InputFileName)

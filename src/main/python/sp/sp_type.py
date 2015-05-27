@@ -61,6 +61,11 @@ class Characteristic :
       #self.tLastValidityTime=None
       #self.tCOSM=None
       self.ClimatologicalField=False
+      self.AncillaryAttr=dict()
+
+   def SetAttributes(self,dAttr) :
+      for item in dAttr :
+         self.AncillaryAttr[item]=dAttr[item]
 
    def setAsClimatologicalField(self) :
       appo=self.TimeCells
