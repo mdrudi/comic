@@ -10,3 +10,4 @@ cProfile.run('spciop.main()',pathname)
 #sys.path.append('/usr/lib/ciop/python/')    #classic python, not anaconda
 import cioppy            #as ciop #classic python, not anaconda
 ciop = cioppy.Cioppy()   # anaconda
+ciop.publish(pathname)
