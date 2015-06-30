@@ -207,7 +207,7 @@ sPar(defaultParameters,'iKey','\.txt$')
 sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
-sPar(defaultParameters,'oat','True')
+sPar(defaultParameters,'oac','True')
 #sPar(defaultParameters,'OutLayer','')
 #sPar(defaultParameters,'oao','')
 #sPar(defaultParameters,'otc','')
@@ -237,8 +237,7 @@ sPar(defaultParameters,'Var','votemper')
 #sPar(defaultParameters,'OutFile','out.nc')
 #sPar(defaultParameters,'oat','')
 #sPar(defaultParameters,'OutLayer','')
-sPar(defaultParameters,'oao','True')
-sPar(defaultParameters,'otc','True')
+sPar(defaultParameters,'oac','True')
 sPar(defaultParameters,'bm','True')
 #sPar(defaultParameters,'s','True')
 sPar(defaultParameters,'iClean','True')
@@ -389,7 +388,7 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'GroupRange','4')
+sPar(parameters,'GroupRange','2')
 
 # mtmg_r_om 
 
@@ -501,7 +500,7 @@ node.set('id','mtc_m_ct')
 node.text='\n'
 node.tail='\n'
 
-ET.SubElement(node,'job').set('id','jt_t')
+ET.SubElement(node,'job').set('id','jt_c')
 
 sources=ET.SubElement(node,'sources')
 sources.text='\n'
@@ -523,31 +522,6 @@ node.set('id','mtc_r_ct')
 node.text='\n'
 node.tail='\n'
 
-ET.SubElement(node,'job').set('id','jt_c')
-
-sources=ET.SubElement(node,'sources')
-sources.text='\n'
-sources.tail='\n'
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mtc_m_ct'
-source.tail='\n'
-
-parameters=ET.SubElement(node,'parameters')
-parameters.text='\n'
-parameters.tail='\n'
-
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
-
-#mtc_r_ct
-
-node=ET.SubElement(workflow,'node')
-node.set('id','mtc_r_ct')
-node.text='\n'
-node.tail='\n'
-
 ET.SubElement(node,'job').set('id','jt_c_r')
 
 sources=ET.SubElement(node,'sources')
@@ -563,8 +537,8 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
+sPar(parameters,'iKey','mapcomic2(.*)(\.nc$)')
+sPar(parameters,'OutFile','out_m_12.nc')
 
 #mtc_r_oa
 
@@ -573,7 +547,7 @@ node.set('id','mtc_r_oa')
 node.text='\n'
 node.tail='\n'
 
-ET.SubElement(node,'job').set('id','jt_c_r')
+ET.SubElement(node,'job').set('id','jt_o')
 
 sources=ET.SubElement(node,'sources')
 sources.text='\n'
@@ -588,8 +562,8 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
+sPar(parameters,'iKey','mapcomic2(.*)(\.nc$)')
+sPar(parameters,'OutFile','out_ts_12.nc')
 
 #ET.dump(application)
 print ET.tostring(application)
