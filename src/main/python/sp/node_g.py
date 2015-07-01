@@ -6,9 +6,9 @@ import mr
 mymr=mr.mr()
 
 # import the ciop functtons (e.g. copy, log)
-import sys
-sys.path.append('/usr/lib/ciop/python/')
-import cioppy as ciop
+#sys.path.append('/usr/lib/ciop/python/')    #classic python, not anaconda
+import cioppy            #as ciop #classic python, not anaconda
+ciop = cioppy.Cioppy()   # anaconda
 
 #def GetLine(keyPattern=None) :
 #   import sys

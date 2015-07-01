@@ -7,11 +7,11 @@ import sp
 
 import site
 import os
-import sys
 
 # import the ciop functtons (e.g. copy, log)
-sys.path.append('/usr/lib/ciop/python/')
-import cioppy as ciop
+#sys.path.append('/usr/lib/ciop/python/')    #classic python, not anaconda
+import cioppy            #as ciop #classic python, not anaconda
+ciop = cioppy.Cioppy()   # anaconda
 
 def CheckNone(text) :
    if ( text == 'None' ) or ( text == '' ) :
@@ -27,7 +27,8 @@ def GetInput(InputFileName) :
    ciop.log('INFO', 'input: ' + InputFileName)
    #print 'Input File Name :',InputFileName
    res = ciop.copy(InputFileName, os.environ['TMPDIR'])
-   LocalInputFileName = os.path.basename(res[0].rstrip('\n'))
+   # LocalInputFileName = os.path.basename(res[0].rstrip('\n')) #classic python, not anaconda
+   LocalInputFileName = os.path.basename(res) # anaconda
    if opt['bm'] : sp_bm.bm_update(sp_bm.BM_WRAP)
    return LocalInputFileName
 

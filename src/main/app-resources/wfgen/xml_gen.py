@@ -445,54 +445,6 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-#mty_r_oa
-
-node=ET.SubElement(workflow,'node')
-node.set('id','mty_r_oa')
-node.text='\n'
-node.tail='\n'
-
-ET.SubElement(node,'job').set('id','jt_o')
-
-sources=ET.SubElement(node,'sources')
-sources.text='\n'
-sources.tail='\n'
-
-#for y in myRange :
-#   for m in ('01','02','03','04','05','06','07','08','09','10','11','12') :
-#      source=ET.SubElement(sources,'source')
-#      source.set('refid','wf:node')
-#      source.text='node_t_'+str(y)+m
-#      source.tail='\n'
-#      if y == endYear and m == endMonth : break
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mtmg_r_om'
-source.tail='\n'
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mtc_r_oa'
-source.tail='\n'
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mtc_r_ct'
-source.tail='\n'
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mty_m_ta'
-source.tail='\n'
-
-parameters=ET.SubElement(node,'parameters')
-parameters.text='\n'
-parameters.tail='\n'
-
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
-
 #mtc_m_ct
 
 node=ET.SubElement(workflow,'node')
@@ -564,6 +516,56 @@ parameters.tail='\n'
 
 sPar(parameters,'iKey','mapcomic2(.*)(\.nc$)')
 sPar(parameters,'OutFile','out_ts_12.nc')
+
+#mty_r_oa
+
+node=ET.SubElement(workflow,'node')
+node.set('id','mty_r_oa')
+node.text='\n'
+node.tail='\n'
+
+ET.SubElement(node,'job').set('id','jt_o')
+
+sources=ET.SubElement(node,'sources')
+sources.text='\n'
+sources.tail='\n'
+
+#for y in myRange :
+#   for m in ('01','02','03','04','05','06','07','08','09','10','11','12') :
+#      source=ET.SubElement(sources,'source')
+#      source.set('refid','wf:node')
+#      source.text='node_t_'+str(y)+m
+#      source.tail='\n'
+#      if y == endYear and m == endMonth : break
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mtmg_r_om'
+source.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mtc_r_oa'
+source.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mtc_r_ct'
+source.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mty_m_ta'
+source.tail='\n'
+
+parameters=ET.SubElement(node,'parameters')
+parameters.text='\n'
+parameters.tail='\n'
+
+sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
+sPar(parameters,'OutFile','out4.nc')
+
+
 
 #ET.dump(application)
 print ET.tostring(application)
