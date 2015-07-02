@@ -108,11 +108,17 @@ class Characteristic :
          #print self.TimeCells,Test.TimeCells
          stc=netCDF4.num2date(self.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
          ttc=netCDF4.num2date(Test.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
+         print >>sys.stderr, 'WARNING 11 : leap year for climatology...'
          #print stc,ttc
          #if (stc[0].year == ttc[0].year and stc[1].year == ttc[1].year ) : 
             #stc[1].year=ttc[0].year
-         nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,stc[-1][1].day,stc[-1][1].hour,stc[-1][1].minute)
-         nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,ttc[-1][1].day,ttc[-1][1].hour,ttc[-1][1].minute)
+         if stc[-1][1].month == 2 and stc[-1][1].day == 29 : il_day=28
+         else : il_day=stc[-1][1].day
+         nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,il_day,stc[-1][1].hour,stc[-1][1].minute)
+         #print nstc,stc[0][0].year,ttc[-1][1].month,ttc[-1][1].day
+         if ttc[-1][1].month == 2 and ttc[-1][1].day == 29 : il_day=28
+         else : il_day=ttc[-1][1].day
+         nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,il_day,ttc[-1][1].hour,ttc[-1][1].minute)
          #print nttc
 #         if stc[0][0].year <= ttc[0][0].year and ( nstc==ttc[0][0] or nttc==stc[0][0] ) :
          if ( nstc==ttc[0][0] and stc[0][0].year <= ttc[0][0].year ) or ( nttc==stc[0][0] and ttc[0][0].year <= stc[0][0].year ) :
@@ -212,8 +218,12 @@ class Characteristic :
             ttc=netCDF4.num2date(In.TimeCells,units='hours since 1900-01-01 00:00:00',calendar='standard')
             #nstc=datetime.datetime(ttc[0].year,stc[1].month,stc[1].day,stc[1].hour,stc[1].minute)
             #nttc=datetime.datetime(stc[0].year,ttc[1].month,ttc[1].day,ttc[1].hour,ttc[1].minute)
-            nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,stc[-1][1].day,stc[-1][1].hour,stc[-1][1].minute)
-            nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,ttc[-1][1].day,ttc[-1][1].hour,ttc[-1][1].minute)
+            if stc[-1][1].month == 2 and stc[-1][1].day == 29 : il_day=28
+            else : il_day=stc[-1][1].day
+            nstc=datetime.datetime(ttc[0][0].year,stc[-1][1].month,il_day,stc[-1][1].hour,stc[-1][1].minute)
+            if ttc[-1][1].month == 2 and ttc[-1][1].day == 29 : il_day=28
+            else : il_day=ttc[-1][1].day
+            nttc=datetime.datetime(stc[0][0].year,ttc[-1][1].month,il_day,ttc[-1][1].hour,ttc[-1][1].minute)
             if nstc==ttc[0][0] and stc[0][0].year <= ttc[0][0].year :
                self.TimeCells=numpy.concatenate((self.TimeCells,In.TimeCells),axis=0)
                self.COSM=numpy.ma.concatenate((self.COSM,app),axis=0)

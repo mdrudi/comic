@@ -97,6 +97,9 @@ def main():
    if not opt['oao'] : opt['oao']=None
    try : opt['otc']=(ciop.getparam('otc')=='True')
    except : opt['otc']=False
+   try : opt['oac']=(ciop.getparam('oac')=='True')
+   except : opt['oac']=False
+   if not opt['oac'] : opt['oac']=None
    try : opt['bm']=(ciop.getparam('bm')=='True')
    except : opt['bm']=False
    try : opt['s']=(ciop.getparam('s')=='True')
@@ -104,7 +107,7 @@ def main():
    opt['v']=False
 
    VSpaceAverage=(opt['OutLayer'] is not None) 
-   TimeAverage=(opt['oat'] is not None) 
+   TimeAverage=(opt['oat'] is not None or opt['oac'] is not None) 
    OSpaceAverage=(opt['oao'] is not None) 
 
    One2One=(opt['InFile'] != 'list')
@@ -121,6 +124,7 @@ def main():
    print " Lon x Lat Range : ", sp.NoneOrList(opt['LonLat'])
    print "\nComputation"
    print " Grid - Time      : ", opt['oat']
+   print " Grid - Climatological Time      : ", opt['oac']
    print " Grid - Layer     : ", sp.NoneOrList(opt['OutLayer'])
    print " Grid - Lon x Lat : ", opt['oao']
    print "\nOutput"
@@ -158,12 +162,12 @@ def main():
                LocalInputFileName = GetInput(InputFileName)
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
-               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , ClimatologicalAverage=opt['oac'] , RemoveInput=opt['iClean'])
                Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
                InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
-            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , ClimatologicalAverage=opt['oac'] , RemoveInput=opt['iClean'])
             Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
       my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
