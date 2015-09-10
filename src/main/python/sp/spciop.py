@@ -104,6 +104,8 @@ def main():
    except : opt['bm']=False
    try : opt['s']=(ciop.getparam('s')=='True')
    except : opt['s']=False
+   try : opt['AttrStr']=CheckNone(ciop.getparam('AttrStr'))
+   except : opt['AttrStr']=None
    opt['v']=False
 
    VSpaceAverage=(opt['OutLayer'] is not None) 
@@ -117,6 +119,7 @@ def main():
    print "\nInput"
    print " Input File/s    : ", opt['InFile']
    print " Selection Key   : ", opt['iKey']
+   print " Attribute Str   : ", opt['AttrStr']
    print "\nWorking Domain"
    print " Variable/s      : ", opt['Var']
    print " Time Range      :  None"
@@ -162,15 +165,15 @@ def main():
                LocalInputFileName = GetInput(InputFileName)
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
-               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , ClimatologicalAverage=opt['oac'] , RemoveInput=opt['iClean'])
+               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
                InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
-            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , ClimatologicalAverage=opt['oac'] , RemoveInput=opt['iClean'])
+            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
             Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
-      my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
+      my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)

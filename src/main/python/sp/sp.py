@@ -17,7 +17,7 @@ sp_glob.verbose=False
 
 
 class sp :
-   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None) :
+   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None,AttrStr=None) :
 
       self.OutApp=None
 
@@ -58,6 +58,9 @@ class sp :
       if AttrFile is not None :
          import json
          self.dAttrOut=json.load(open(AttrFile,'r'))
+      elif AttrStr is not None :
+         import json
+         self.dAttrOut=json.loads(AttrStr)
       else : self.dAttrOut=dict()
 
    def once(self,InputFileName,OutFileNameIsPostfix=False) :
@@ -152,9 +155,11 @@ class sp :
       if self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) :
          self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
       #print 'XXX lc',self.OutApp.COSM.shape
+      if self.InputVariableName in self.dAttrOut : self.OutApp.SetAttributes(self.dAttrOut[self.InputVariableName])
       if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
       import os
-      WriteFile(self.OutApp,self.OutFileName)
+      if 'global' in self.dAttrOut : WriteFile(self.OutApp,self.OutFileName,self.dAttrOut['global'])
+      else : WriteFile(self.OutApp,self.OutFileName)
       if self.bm : sp_bm.bm_update(sp_bm.BM_WRITE,self.OutApp.COSM)
       self.OutApp=None
       return os.getcwd()+'/'+self.OutFileName
@@ -224,7 +229,8 @@ class tag_op :
       parser.add_option("--ilonlat",   dest="LonLat",          default=None,     metavar="LonLat",       help="optional - spatial working domain - default : the whole in input")
       parser.add_option("--ikey",      dest="iKey",            default=None,     metavar="iKey",         help="optional - input selection mapreduce key/s")
       parser.add_option("--iClean",    dest="iClean",          default=False,    action="store_true",    help="flag to remove the input file after reading")
-      parser.add_option("--iattr",     dest="AttrFile",        default=None,     metavar="AttrFile",     help="optional - template for metadata in output netcdf file")
+      parser.add_option("--iattrf",    dest="AttrFile",        default=None,     metavar="AttrFile",     help="optional - file with template for metadata in output netcdf file")
+      parser.add_option("--iattrs",    dest="AttrStr",         default=None,     metavar="AttrStr",      help="optional - string with template for metadata in output netcdf file")
       parser.add_option("--ofile",     dest="MyOutFile",       default="out.nc", metavar="OutFile",      help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
       parser.add_option("--oat",       dest="oat",             default=None,     action="store_true",    help="flag to activate the computation of average value over time")
       parser.add_option("--oac",       dest="oac",             default=None,     action="store_true",    help="flag to activate the computation of climatological average value over time")
@@ -290,6 +296,7 @@ class tag_op :
       self.oac=options.oac
       self.oKey=options.oKey
       self.AttrFile=options.AttrFile
+      self.AttrStr=options.AttrStr
 
 
 def EchoInputFile(text) :
@@ -351,6 +358,7 @@ def main():
    print >>sys.stderr, " Input File/s    : ", opt.InFile
    print >>sys.stderr, " Selection Key   : ", opt.iKey
    print >>sys.stderr, " Attribute File  : ", opt.AttrFile
+   print >>sys.stderr, " Attribute String: ", opt.AttrStr
    print >>sys.stderr, "\nWorking Domain"
    print >>sys.stderr, " Variable/s      : ", opt.Variables
    print >>sys.stderr, " Time Range      :  None"
@@ -398,7 +406,7 @@ def main():
                #one=True
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
-               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean )
+               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
                Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream",outputKey=opt.oKey)
                InputFileName=GetLine(opt.bm,keyPattern)
             #if one :
@@ -406,11 +414,11 @@ def main():
             #EchoOutputFile(OutputFileName)
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
-            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean )
+            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile)
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=GetLine(opt.bm,keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
@@ -421,7 +429,7 @@ def main():
 
    # one file to one file
    elif One2One : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile)
+      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=opt.InFile
       EchoInputFile(InputFileName)
       OutputFileName=my_sp.once(InputFileName)
