@@ -128,7 +128,8 @@ def main():
       #print os.getcwd()+'/'+out_file_name
 
 if __name__ == "__main__":
-   import sp_bm
+   #import sp_bm
+   from comic import bmmng as sp_bm
    sp_bm.bm_setup()
    main()
    sp_bm.bm_update(sp_bm.BM_WRAP)

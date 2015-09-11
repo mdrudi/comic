@@ -3,192 +3,28 @@
 import sys
 import os
 
-import sp_glob
-import sp_type
-from sp_ionc import ReadFile, WriteFile
-import sp_bm
+#import sp_glob
+#import sp_type
+#from sp_ionc import ReadFile, WriteFile
+#import sp_bm
 import mr
+mymr=mr.mr()
+import comic
+from comic import bmmng as sp_bm
 
-sp_glob.verbose=False
+#sp_glob.verbose=False
 
 #center of input layer : 1.47 4.58 7.94 11.55
 # input layers         : 0 - 2.94 - 6.22 - 9.66 - 13.44
 # input thickness      : 2.94 3.28 3.44 3.78
 
-
-class sp :
-   def __init__(self,InputVariableName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None,AttrStr=None) :
-
-      self.OutApp=None
-
-      #par to read data
-      self.InputVariableName=InputVariableName
-      self.LonLat=LonLat 
-      #self.Lat=Lat
-      self.LonMinMax=None
-      self.LatMinMax=None
-      if self.LonLat is not None :
-         self.LonMinMax=[0,0]
-         self.LatMinMax=[0,0]
-         self.LonMinMax[0]=self.LonLat[0][0][0]
-         self.LonMinMax[1]=self.LonLat[0][0][1]
-         self.LatMinMax[0]=self.LonLat[0][1][0]
-         self.LatMinMax[1]=self.LonLat[0][1][1]
-         for Region in self.LonLat :
-            LonRange=Region[0]
-            LatRange=Region[1]
-            if self.LonMinMax[0]>LonRange[0] : self.LonMinMax[0]=LonRange[0]
-            if self.LonMinMax[1]<LonRange[1] : self.LonMinMax[1]=LonRange[1]
-            if self.LatMinMax[0]>LatRange[0] : self.LatMinMax[0]=LatRange[0]
-            if self.LatMinMax[1]<LatRange[1] : self.LatMinMax[1]=LatRange[1]
-
-      #par to elaborate and output data
-      self.OutputLayer=OutputLayer
-      self.OutFileName=OutFileName
-      self.OutLonLat=OutLonLat
-      self.TimeAverage=TimeAverage
-      self.ClimatologicalAverage=ClimatologicalAverage
-
-      #behaviour flags
-      self.bm=bm
-      self.SpeedUp=SpeedUp
-      #self.sList=sList
-      self.CatList=list()
-      self.RemoveInput=RemoveInput
-      if AttrFile is not None :
-         import json
-         self.dAttrOut=json.load(open(AttrFile,'r'))
-      elif AttrStr is not None :
-         import json
-         self.dAttrOut=json.loads(AttrStr)
-      else : self.dAttrOut=dict()
-
-   def once(self,InputFileName,OutFileNameIsPostfix=False) :
-      print >>sys.stderr, 'WARNING 5 : possible improvement if data to read is reduced to the min size'
-      #print self.LonMinMax,self.LatMinMax
-
-      InApp=ReadFile(InputFileName,self.InputVariableName,self.LonMinMax,self.LatMinMax,self.OutputLayer,self.RemoveInput)
-      #print InApp.COSM.size
-      if self.bm : sp_bm.bm_update(sp_bm.BM_READ,InApp.COSM)
-
-      self.OutApp=InApp
-      if self.InputVariableName in self.dAttrOut : self.OutApp.SetAttributes(self.dAttrOut[self.InputVariableName])
-      if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
-      if self.OutputLayer is not None or self.OutLonLat is not None :
-         self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
-      #else :
-      #   self.OutApp=sp_type.Characteristic.copy(InApp)
-      if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
-
-      if OutFileNameIsPostfix :
-         import os
-         OutFileName=os.getcwd()+'/'+os.path.basename(InputFileName)+self.OutFileName
-      else :
-         OutFileName=self.OutFileName
-      if 'global' in self.dAttrOut : WriteFile(self.OutApp,OutFileName,self.dAttrOut['global'])
-      else : WriteFile(self.OutApp,OutFileName)
-      if self.bm : sp_bm.bm_update(sp_bm.BM_WRITE,self.OutApp.COSM)
-
-      self.OutApp=None
-      return OutFileName
-
-   def loop_go(self,InputFileName) :
-      print >>sys.stderr, 'WARNING 6 : possible improvement if data to read is reduced'
-      #print self.LonMinMax,self.LatMinMax
-
-      InApp=ReadFile(InputFileName,self.InputVariableName,self.LonMinMax,self.LatMinMax,self.OutputLayer,self.RemoveInput)
-      if self.bm : sp_bm.bm_update(sp_bm.BM_READ,InApp.COSM)
-
-      # TIMESERIES WITH OR WITHOUT LAYERS
-      if self.OutApp is None :
-         self.OutApp=InApp
-         if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
-         if not ( self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) ) :
-            self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
-         if self.ClimatologicalAverage : self.OutApp.setAsClimatologicalField()
-#         print 'aaaaaaaaaaaaa',self.OutApp.ClimatologicalField
-      else :
-         if self.TimeAverage :
-            if self.ClimatologicalAverage : InApp.setAsClimatologicalField()
-            self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-         else :
-            if self.LonLat is not None : InApp.mask_out_of(self.LonLat)
-            #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] :
-            if self.OutApp.IsAdiacent(InApp) :
-               self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-            else :
-               self.CatList.append(InApp)
-               print >>sys.stderr, 'WARNING 15 : not able to handle this case now : concatenation postponed'
-      
-#      print 'TGH :',self.OutApp.TimeCells,InApp.TimeCells
-#      if self.TimeAverage : 
-#         self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-#      else :
-#         #print 'TGH :',self.OutApp.TimeCells,InApp.TimeCells
-#         if self.OutApp.TimeCells is None :
-#            self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-#         elif self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] :
-#            self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-#         else :
-#            print 'WARNING 15 : not able to handle this case now : concatenation postponed'
-#            self.CatList.append(InApp)
-      if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
-
-
-   def loop_close(self) :
-      if self.TimeAverage : 
-         self.OutApp.operator_tClose()
-      else :
-         maxi=len(self.CatList)
-         while len(self.CatList) != 0 and maxi != 0 :
-            maxi=maxi-1
-            for i in range(len(self.CatList)) :
-               InApp=self.CatList.pop(0)
-            #for InApp in self.CatList :
-               #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] : 
-               if self.OutApp.IsAdiacent(InApp) :
-                  self.OutApp.operator_tAdd(InApp,self.TimeAverage)
-               else :
-                  self.CatList.append(InApp)
-      if len(self.CatList) != 0 : print 'ERROR 1 : wrong input'
-      print >>sys.stderr, 'WARNING 1: something to improve...'  # in ch ordine tclose e operator_s
-      if self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) :
-         self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
-      #print 'XXX lc',self.OutApp.COSM.shape
-      if self.InputVariableName in self.dAttrOut : self.OutApp.SetAttributes(self.dAttrOut[self.InputVariableName])
-      if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
-      import os
-      if 'global' in self.dAttrOut : WriteFile(self.OutApp,self.OutFileName,self.dAttrOut['global'])
-      else : WriteFile(self.OutApp,self.OutFileName)
-      if self.bm : sp_bm.bm_update(sp_bm.BM_WRITE,self.OutApp.COSM)
-      self.OutApp=None
-      return os.getcwd()+'/'+self.OutFileName
-
-
-
-
-
-#############   COMMAND LINE FRONT END   
+##### PUBLIC FUNCTIONALITIES : START
 
 def ParseRange ( opt ) :
    import numpy
    import json
    #return numpy.array(map(float,opt.replace(" ","").replace("[","").replace("]","").split(",")))
    return numpy.array(json.loads(opt))
-
-#http://stackoverflow.com/questions/301134/dynamic-module-import-in-python
-
-#http://stackoverflow.com/questions/8525765/load-parameters-from-a-file-in-python
-class Params(object):
-   def __init__(self, input_file_name):
-      with open(input_file_name, 'r') as input_file:
-         for line in input_file:
-            #print line
-            row = line.split("#")[0].split("=")
-            label = row[0].replace(" ","").replace("\r","").replace("\n","")
-            if label != "" :
-               data = row[1].replace(" ","").replace("\r","").replace("\n","")  # rest of row is data list
-               self.__dict__[label] = data #values if len(values) > 1 else values[0]
 
 def GetLine(opt_bm,keyPattern=None,stream=sys.stdin) :
    import sys
@@ -216,6 +52,40 @@ def GetLine(opt_bm,keyPattern=None,stream=sys.stdin) :
 #         if opt_bm : sp_bm.bm_update(sp_bm.BM_IDLE)
 #         a=a.replace("\r","").replace("\n","").replace(" ","").replace("\t","")
 #      return False
+
+def EchoInputFile(text) :
+   print >>sys.stderr, 'Input File  :',text
+
+def EchoOutputFile(text,key=None) :
+   #print text
+   #sys.stdout.flush
+   if key is None : mymr.PushRecord(text)
+   else : mymr.PushRecord(text,(key,))
+   print >>sys.stderr, 'Output File :',text
+
+def NoneOrList(ar) :
+   if ar is None : return None
+   return ar.tolist()
+
+##### PUBLIC FUNCTIONALITIES : END
+
+
+
+##### LOCAL FUNCTIONALITIES : START
+
+#http://stackoverflow.com/questions/301134/dynamic-module-import-in-python
+
+#http://stackoverflow.com/questions/8525765/load-parameters-from-a-file-in-python
+class Params(object):
+   def __init__(self, input_file_name):
+      with open(input_file_name, 'r') as input_file:
+         for line in input_file:
+            #print line
+            row = line.split("#")[0].split("=")
+            label = row[0].replace(" ","").replace("\r","").replace("\n","")
+            if label != "" :
+               data = row[1].replace(" ","").replace("\r","").replace("\n","")  # rest of row is data list
+               self.__dict__[label] = data #values if len(values) > 1 else values[0]
 
 
 class tag_op :
@@ -299,24 +169,6 @@ class tag_op :
       self.AttrStr=options.AttrStr
 
 
-def EchoInputFile(text) :
-   print >>sys.stderr, 'Input File  :',text
-
-import mr
-mymr=mr.mr()
-
-def EchoOutputFile(text,key=None) :
-   #print text
-   #sys.stdout.flush
-   if key is None : mymr.PushRecord(text)
-   else : mymr.PushRecord(text,(key,))
-   print >>sys.stderr, 'Output File :',text
-
-def NoneOrList(ar) :
-   if ar is None : return None
-   return ar.tolist()
-
-
 def Many2OneBlock (opt_bm,my_sp,InitFileName,keyPattern,type=None,outputKey=None) :
    import sys
    if type == "stream" :
@@ -336,16 +188,28 @@ def Many2OneBlock (opt_bm,my_sp,InitFileName,keyPattern,type=None,outputKey=None
       EchoOutputFile(output_name,outputKey)
 
 
+##### LOCAL FUNCTIONALITIES : END
+
+
+
+
+
+
+##### COMMAND LINE FRONT END : START
+
+
 def main():
    import re
    #import time   #test to use time.sleep
    sp_bm.bm_setup()
+
    print >>sys.stderr, "sp.py"
+   print >>sys.stderr, "available processors :",comic.processor.dict
 
    opt=tag_op()
 
    if opt.v :
-      sp_glob.verbose=True
+      comic.glob.verbose=True
    
    VSpaceAverage=(opt.OutLayer is not None) 
    TimeAverage=(opt.oat is not None or opt.oac is not None)
@@ -406,7 +270,7 @@ def main():
                #one=True
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
-               my_sp=sp(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+               my_sp=comic.pilot(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
                Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream",outputKey=opt.oKey)
                InputFileName=GetLine(opt.bm,keyPattern)
             #if one :
@@ -414,11 +278,11 @@ def main():
             #EchoOutputFile(OutputFileName)
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
-            my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+            my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=GetLine(opt.bm,keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
@@ -429,7 +293,7 @@ def main():
 
    # one file to one file
    elif One2One : 
-      my_sp=sp(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=opt.InFile
       EchoInputFile(InputFileName)
       OutputFileName=my_sp.once(InputFileName)

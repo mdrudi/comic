@@ -1,11 +1,13 @@
 #!/opt/anaconda/bin/python
 
-import sp_bm
+#import sp_bm
+import comic
+from comic import bmmng as sp_bm
 import sp
 
 #############   CIOP FRONT END   
 
-import site
+#import site
 import os
 
 # import the ciop functtons (e.g. copy, log)
@@ -74,7 +76,8 @@ def main():
 
    os.chdir(os.environ['TMPDIR'])
 
-   print "sp-ciop.py"
+   print "spciop.py"
+   print "available processors :",comic.processor.dict
 
    #opt=dict()
    opt['InFile']=ciop.getparam('InFile')   #MANDATORY
@@ -165,15 +168,15 @@ def main():
                LocalInputFileName = GetInput(InputFileName)
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
-               my_sp=sp.sp(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+               my_sp=comic.pilot(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
                InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
-            my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+            my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
             Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
-      my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+      my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)

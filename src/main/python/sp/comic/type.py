@@ -2,6 +2,8 @@
 import numpy
 import sys
 
+from . import glob as sp_glob
+
 #http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
 def find_nearest(array,value):
     idx = (numpy.abs(array-value)).argmin()
@@ -260,10 +262,6 @@ class Characteristic :
 
 
 
-
-import sp_glob 
-
-#verbose=False
 
 def FindLowerTop(LayerIn,LayerOutLower,LayerOutTop) :
    i=0
