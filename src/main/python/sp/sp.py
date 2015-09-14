@@ -95,7 +95,7 @@ class tag_op :
 
       parser = optparse.OptionParser()
       parser.add_option("--ifile",     dest="MyInputFile",     default="none",   metavar="InFile",       help="read data from file InFile (netcdf format) ; if InFile='list' then read data from the list of files which names are passed in standard input") 
-      parser.add_option("--ifield",    dest="MyInputVariable", metavar="Var",    help="working variable to be read from input file/s")
+      parser.add_option("--ifield",    dest="MyInputVariable", default="none",   metavar="Var",          help="working variable to be read from input file/s")
       parser.add_option("--ilonlat",   dest="LonLat",          default=None,     metavar="LonLat",       help="optional - spatial working domain - default : the whole in input")
       parser.add_option("--ikey",      dest="iKey",            default=None,     metavar="iKey",         help="optional - input selection mapreduce key/s")
       parser.add_option("--iClean",    dest="iClean",          default=False,    action="store_true",    help="flag to remove the input file after reading")
@@ -107,6 +107,7 @@ class tag_op :
       parser.add_option("--oav",       dest="oav",             default=None,     metavar="OutLayer" ,    help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
       parser.add_option("--oao",       dest="oao",             default=None,     action="store_true",    help="flag to activate the computation of average value over the spatial lon lat plane")
       parser.add_option("--otc",       dest="otc",             default=None,     action="store_true",    help="flag to concatenate output along the time dimension into one single output file")
+      parser.add_option("--ofc",       dest="ofc",             default=None,     metavar="OutField",     help="flag to activate the computation of new field")
       parser.add_option("--okey",      dest="oKey",            default=None,     metavar="oKey",         help="optional - output mapreduce key")
       parser.add_option("-v",          dest="verbose",         default=False,    action="store_true",    help="legacy - be verbose")
       parser.add_option("-p",          dest="MyParameterFile", default='none',   metavar="ParFile",      help="legacy - alternative parameter file to provide var , lout, lon, lat")
@@ -153,6 +154,11 @@ class tag_op :
          self.otc=True
       else :
          self.otc=None
+
+      if options.ofc is not None :
+         self.OutField=options.ofc
+      else :
+         self.OutField=None
 
       self.InFile=options.MyInputFile
       self.iKey=options.iKey
@@ -210,13 +216,22 @@ def main():
 
    if opt.v :
       comic.glob.verbose=True
+
+   if opt.OutField is not None :
+      print "WARNING : forcing the input variable"
+      opt.Variables=comic.processor.dict[opt.OutField][0]
+      print "WARNING : forcing the operation flags to ensure the correct behaviour"
+      opt.OutTRange=None
+      opt.OutLayer=None
+      opt.oao=None
    
    VSpaceAverage=(opt.OutLayer is not None) 
    TimeAverage=(opt.oat is not None or opt.oac is not None)
    OSpaceAverage=(opt.oao is not None) 
+   FieldComputation=(opt.OutField is not None)
    One2One=(opt.InFile != 'list')
-   Many2One=(opt.InFile == 'list') and ( TimeAverage or opt.otc is not None )
-   Many2Many=(opt.InFile == 'list') and not TimeAverage and opt.otc is None
+   Many2One=(opt.InFile == 'list') and ( TimeAverage or opt.otc is not None or FieldComputation )
+   Many2Many=(opt.InFile == 'list') and not TimeAverage and opt.otc is None and not FieldComputation
 
    print >>sys.stderr, "\nInput"
    print >>sys.stderr, " Input File/s    : ", opt.InFile
@@ -233,6 +248,7 @@ def main():
    print >>sys.stderr, " Grid - Climatological Time      : ", opt.oac
    print >>sys.stderr, " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
    print >>sys.stderr, " Grid - Lon x Lat : ", opt.oao
+   print >>sys.stderr, " Field            : ", opt.OutField
    print >>sys.stderr, "\nOutput"
    if Many2Many : 
       print >>sys.stderr, " File             : [InputFile]+", opt.OutFile
@@ -244,6 +260,7 @@ def main():
    print >>sys.stderr, " average over vertical space  :",VSpaceAverage
    print >>sys.stderr, " average over orizontal space :",OSpaceAverage
    print >>sys.stderr, " average over time            :",TimeAverage
+   print >>sys.stderr, " compute new field            :",FieldComputation
    print >>sys.stderr, "\nWhich I/O Flow Schema"
    print >>sys.stderr, " many to many :",Many2Many
    print >>sys.stderr, " many to one  :",Many2One
@@ -270,7 +287,10 @@ def main():
                #one=True
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
-               my_sp=comic.pilot(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+               if FieldComputation :
+                  my_sp=comic.pilot(opt.OutField,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+               else :
+                  my_sp=comic.pilot(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )   
                Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream",outputKey=opt.oKey)
                InputFileName=GetLine(opt.bm,keyPattern)
             #if one :
@@ -278,7 +298,10 @@ def main():
             #EchoOutputFile(OutputFileName)
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
-            my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+            if FieldComputation :
+               my_sp=comic.pilot(opt.OutField,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+            else :
+               my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 

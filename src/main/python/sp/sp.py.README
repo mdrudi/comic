@@ -22,9 +22,24 @@ sp.py --ifile 19890701_mm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifiel
 
 sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --otc < ../inputfiles
 
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat='[]' --bm < ../inputfiles
+
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat='["1986-12-31 14:00","1987-01-03 12:00"]' --bm < ../inputfiles
+
+sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --oat='["1986-12-31 14:00","1987-01-03 12:00"]' --bm --ofc density < ../inputfiles
+
 sp.py --ifile ../data_in/19870101_dm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,50,100,500,1000,2000]' --bm --iattr=attr.txt
 
 in attr.txt
 {"votemper": {"long_name": "monthly mean map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "monthly mean map","institution": "MELODIES WP6 ACS INGV"}}
 
 sp.py --ifile ../data_in/19870101_dm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --oav='[0,10,50,100,500,1000,2000]' --bm --iattrs='{"votemper": {"long_name": "monthly mean map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "monthly mean map","institution": "MELODIES WP6 ACS INGV"}}'
+
+
+python sp.py --ifile /home/melodies-wp6/ncpi/scratch/data_in/19870101_dm-INGV--TEMP-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm
+mv out.nc out_temp.nc
+python sp.py --ifile /home/melodies-wp6/ncpi/scratch/data_in/19870101_dm-INGV--PSAL-MFSs4b3-MED-b20130712_re-fv04.00.nc --ifield=vosaline --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]' --bm
+mv out.nc out_sal.nc
+ls $PWD/out_* > inputfile.txt
+cat inputfile.txt 
+python sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]'  --bm --ofc density < inputfile.txt

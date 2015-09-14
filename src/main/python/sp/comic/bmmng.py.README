@@ -65,7 +65,7 @@ SYNTAX ON COMMAND LINE
 
 A general call will look like :
 
-find ../../../[path]/../../ -iname bm.txt | [path]/sp_bm.py
+find ../../../[path]/../../ -iname bm.txt | python [path]/bmmng.py
 
 
 
@@ -104,7 +104,7 @@ EXAMPLE ON COMMAND LINE
 ../../../../../toolbox-test/0000015-141201235331088-oozie-oozi-W/node_t_198712/data/bm.txt
 
 
-[melodies-wp6@sb-10-15-27-13 sp]$ echo ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt | ./sp_bm.py
+[melodies-wp6@sb-10-15-27-13 sp]$ echo ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt | python bmmng.py
 ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_v/data/bm.txt
 
 bm---------------
@@ -131,7 +131,7 @@ tot          :  (s) 1338.458
 
 
 
-[melodies-wp6@sb-10-15-27-13 sp]$ find ../../../../../toolbox-test/ -iname bm.txt | ./sp_bm.py 
+[melodies-wp6@sb-10-15-27-13 sp]$ find ../../../../../toolbox-test/ -iname bm.txt | python bmmng.py 
 ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198702/data/bm.txt
 ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198708/data/bm.txt
 ../../../../../toolbox-test/0000016-141201235331088-oozie-oozi-W/node_t_198709/data/bm.txt

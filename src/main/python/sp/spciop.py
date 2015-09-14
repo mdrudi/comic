@@ -103,6 +103,8 @@ def main():
    try : opt['oac']=(ciop.getparam('oac')=='True')
    except : opt['oac']=False
    if not opt['oac'] : opt['oac']=None
+   try : opt['OutField']=CheckNone(ciop.getparam('OutField'))
+   except : opt['OutField']=None
    try : opt['bm']=(ciop.getparam('bm')=='True')
    except : opt['bm']=False
    try : opt['s']=(ciop.getparam('s')=='True')
@@ -111,13 +113,22 @@ def main():
    except : opt['AttrStr']=None
    opt['v']=False
 
+   if opt['OutField'] is not None :
+      print "WARNING : forcing the input variable"
+      opt['Var']=comic.processor.dict[opt.OutField][0]
+      print "WARNING : forcing the operation flags to ensure the correct behaviour"
+      #opt.OutTRange=None
+      opt['OutLayer']=None
+      opt['oao']=None
+
    VSpaceAverage=(opt['OutLayer'] is not None) 
    TimeAverage=(opt['oat'] is not None or opt['oac'] is not None) 
    OSpaceAverage=(opt['oao'] is not None) 
+   FieldComputation=(opt['OutField'] is not None)
 
    One2One=(opt['InFile'] != 'list')
-   Many2One=(opt['InFile'] == 'list') and ( TimeAverage or opt['otc'] )
-   Many2Many=(opt['InFile'] == 'list') and not ( TimeAverage or opt['otc'] ) 
+   Many2One=(opt['InFile'] == 'list') and ( TimeAverage or opt['otc'] or FieldComputation )
+   Many2Many=(opt['InFile'] == 'list') and not ( TimeAverage or opt['otc'] or FieldComputation ) 
 
    print "\nInput"
    print " Input File/s    : ", opt['InFile']
@@ -133,6 +144,7 @@ def main():
    print " Grid - Climatological Time      : ", opt['oac']
    print " Grid - Layer     : ", sp.NoneOrList(opt['OutLayer'])
    print " Grid - Lon x Lat : ", opt['oao']
+   print " Field            : ", opt['OutField']
    print "\nOutput"
    if Many2Many :
       print " File             : [InputFile]+",opt['OutFile']
@@ -143,6 +155,7 @@ def main():
    print " average over vertical space  :",VSpaceAverage
    print " average over orizontal space :",OSpaceAverage
    print " average over time            :",TimeAverage
+   print " compute new field            :",FieldComputation
    print "\nWhich I/O Flow Schema : "
    print " many to many :",Many2Many
    print " many to one  :",Many2One
@@ -168,12 +181,18 @@ def main():
                LocalInputFileName = GetInput(InputFileName)
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
-               my_sp=comic.pilot(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+               if FieldComputation :
+                  my_sp=comic.pilot(opt['OutField'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+               else :
+                  my_sp=comic.pilot(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
                InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
-            my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+            if FieldComputation :
+               my_sp=comic.pilot(opt['OutField'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+            else :
+               my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
             Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
       my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])

@@ -17,7 +17,11 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
 
    MyDataset=netCDF4.Dataset(MyInputFile)
    print >>sys.stderr, 'WARNING 13 : now able to read only Med MFC file format, an important inprovement would be the ability to read bounds'
-   MyDatasetVariable=MyDataset.variables[MyInputVariable]
+
+   try :
+      MyDatasetVariable=MyDataset.variables[MyInputVariable]
+   except :
+      raise NameError('NoInputField')
 
    StandardName=getattr(MyDatasetVariable,'standard_name')
    #mv=getattr(MyDatasetVariable,'missing_value')
