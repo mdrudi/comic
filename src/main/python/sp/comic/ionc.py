@@ -31,8 +31,16 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       #print MyDataset.variables[tV].standard_name
       if MyDataset.variables[tV].standard_name == 'latitude' :
          MyDatasetLat=MyDataset.variables[tV]
+         if 'bounds' in MyDatasetLat.ncattrs() :
+            MyDatasetLatBnds=MyDataset.variables[MyDataset.variables[tV].bounds]
+         else :
+            MyDatasetLatBnds=None
       if MyDataset.variables[tV].standard_name == 'longitude' :
          MyDatasetLon=MyDataset.variables[tV]
+         if 'bounds' in MyDatasetLon.ncattrs() :
+            MyDatasetLonBnds=MyDataset.variables[MyDataset.variables[tV].bounds]
+         else :
+            MyDatasetLonBnds=None
       if MyDataset.variables[tV].standard_name == 'depth' :
          MyDatasetDepth=MyDataset.variables[tV]
       if MyDataset.variables[tV].standard_name == 'time' :
@@ -98,14 +106,22 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
 
    #print 'XYZ',MyDatasetLon,MyDatasetLat
    LonCells=numpy.zeros((MyDatasetLon.size+1))
-   DeltaLon=(MyDatasetLon[1]-MyDatasetLon[0])/2
-   LonCells[0]=MyDatasetLon[0]-DeltaLon
-   LonCells[1:]=MyDatasetLon[:]+DeltaLon
+   if MyDatasetLonBnds is None :
+      DeltaLon=(MyDatasetLon[1]-MyDatasetLon[0])/2
+      LonCells[0]=MyDatasetLon[0]-DeltaLon
+      LonCells[1:]=MyDatasetLon[:]+DeltaLon
+   else :
+      LonCells[0]=MyDatasetLonBnds[0,0]
+      LonCells[1:]=MyDatasetLonBnds[:,1]
 
    LatCells=numpy.zeros((MyDatasetLat.size+1))
-   DeltaLat=(MyDatasetLat[1]-MyDatasetLat[0])/2
-   LatCells[0]=MyDatasetLat[0]-DeltaLat
-   LatCells[1:]=MyDatasetLat[:]+DeltaLat
+   if MyDatasetLatBnds is None :
+      DeltaLat=(MyDatasetLat[1]-MyDatasetLat[0])/2
+      LatCells[0]=MyDatasetLat[0]-DeltaLat
+      LatCells[1:]=MyDatasetLat[:]+DeltaLat
+   else :
+      LatCells[0]=MyDatasetLatBnds[0,0]
+      LatCells[1:]=MyDatasetLatBnds[:,1]
 
    import datetime
 ### READ MONTHLY FILE : START

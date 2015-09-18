@@ -62,7 +62,12 @@ class Characteristic :
       self.tCounter=1
       #self.tLastValidityTime=None
       #self.tCOSM=None
-      self.ClimatologicalField=False
+      if self.TimeCells.ndim==1 :
+         self.ClimatologicalField=False
+      elif self.TimeCells.ndim==2 :
+         self.ClimatologicalField=True
+      else :
+         self.ClimatologicalField=True  #ERROR
       self.AncillaryAttr=dict()
 
    def SetAttributes(self,dAttr) :
