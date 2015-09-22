@@ -20,10 +20,10 @@ def CheckNone(text) :
       return None
    return text
 
-def CheckNoneOrRange(text) :
+def CheckNoneOrRange(text,Time=False) :
    if ( text == 'None' ) or ( text == '' ) :
       return None
-   return sp.ParseRange(text)
+   return sp.ParseRange(text,Time)
 
 def GetInput(InputFileName) :
    ciop.log('INFO', 'input: ' + InputFileName)
@@ -90,9 +90,8 @@ def main():
    try : opt['iClean']=ciop.getparam('iClean')
    except : opt['iClean']=False
    opt['OutFile']=CheckNone(ciop.getparam('OutFile'))   #MANDATORY
-   try : opt['oat']=(ciop.getparam('oat')=='True')
-   except : opt['oat']=False
-   if not opt['oat'] : opt['oat']=None
+   try : opt['OutTRange']=CheckNoneOrRange(ciop.getparam('oat'),Time=True)
+   except : opt['OutTRange']=None
    try : opt['OutLayer']=CheckNoneOrRange(ciop.getparam('OutLayer'))
    except : opt['OutLayer']=None
    try : opt['oao']=(ciop.getparam('oao')=='True')     
@@ -122,7 +121,8 @@ def main():
       opt['oao']=None
 
    VSpaceAverage=(opt['OutLayer'] is not None) 
-   TimeAverage=(opt['oat'] is not None or opt['oac'] is not None) 
+   TimeAverage=(opt['OutTRange'] is not None or opt['oac'] is not None) 
+   if TimeAverage and opt['OutTRange'] is None : opt['OutTRange']=sp.ParseRange('[]')
    OSpaceAverage=(opt['oao'] is not None) 
    FieldComputation=(opt['OutField'] is not None)
 
@@ -140,7 +140,7 @@ def main():
    print " Depth Range     :  None"
    print " Lon x Lat Range : ", sp.NoneOrList(opt['LonLat'])
    print "\nComputation"
-   print " Grid - Time      : ", opt['oat']
+   print " Grid - Time      : ", sp.NoneOrList(opt['OutTRange'])
    print " Grid - Climatological Time      : ", opt['oac']
    print " Grid - Layer     : ", sp.NoneOrList(opt['OutLayer'])
    print " Grid - Lon x Lat : ", opt['oao']
@@ -182,20 +182,20 @@ def main():
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
                if FieldComputation :
-                  my_sp=comic.pilot(opt['OutField'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+                  my_sp=comic.pilot(opt['OutField'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                else :
-                  my_sp=comic.pilot(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+                  my_sp=comic.pilot(opt['Var'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                Many2OneBlock(opt['bm'],my_sp,LocalInputFileName,None,type="stream") 
                InputFileName=sp.GetLine(opt['bm'],keyPattern)
          else : #in this case must be InputFileName[-3:]==".nc"
             print "Processing simple..."
             if FieldComputation :
-               my_sp=comic.pilot(opt['OutField'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+               my_sp=comic.pilot(opt['OutField'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
             else :
-               my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+               my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
             Many2OneBlock(opt['bm'],my_sp,InputFileName,keyPattern)
    elif Many2Many :
-      my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage, RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
+      my_sp=comic.pilot(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
       while InputFileName :
          LocalInputFileName = GetInput(InputFileName)

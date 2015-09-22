@@ -7,7 +7,7 @@ from . import processor
 from . import bmmng as sp_bm
 
 class sp :
-   def __init__(self,OutputFieldName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeAverage=False,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None,AttrStr=None) :
+   def __init__(self,OutputFieldName,OutFileName,LonLat=None,OutputLayer=None,bm=False,SpeedUp=False,OutLonLat=None,TimeRange=None,ClimatologicalAverage=False,RemoveInput=False,AttrFile=None,AttrStr=None) :
 
       self.OutApp=None
 
@@ -36,7 +36,7 @@ class sp :
       self.OutputLayer=OutputLayer
       self.OutFileName=OutFileName
       self.OutLonLat=OutLonLat
-      self.TimeAverage=TimeAverage
+      self.TimeRange=TimeRange
       self.ClimatologicalAverage=ClimatologicalAverage
 
       #behaviour flags
@@ -107,17 +107,19 @@ class sp :
                if self.LonLat is not None : self.OutApp.mask_out_of(self.LonLat)
                if not ( self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) ) :
                   self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)
+               if self.TimeRange is not None : self.OutApp.set_weight(self.TimeRange)
                if self.ClimatologicalAverage : self.OutApp.setAsClimatologicalField()
-#               print 'aaaaaaaaaaaaa',self.OutApp.ClimatologicalField
+               #print 'aaaaaaaaaaaaa',self.OutApp.ClimatologicalField
             else :
-               if self.TimeAverage :
+               if self.TimeRange is not None :
                   if self.ClimatologicalAverage : InApp.setAsClimatologicalField()
-                  self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+                  self.OutApp.operator_tAdd(InApp,TimeAverage=True)
+                  #print 'cccc'
                else :
                   if self.LonLat is not None : InApp.mask_out_of(self.LonLat)
                   #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] :
                   if self.OutApp.IsAdiacent(InApp) :
-                     self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+                     self.OutApp.operator_tAdd(InApp)
                   else :
                      self.CatList.append(InApp)
                      print >>sys.stderr, 'WARNING 15 : not able to handle this case now : concatenation postponed'
@@ -147,7 +149,7 @@ class sp :
          func=processor.dict[self.OutputFieldName][1]
          self.OutApp=func(self.ListInApp)
       else :
-         if self.TimeAverage : 
+         if self.TimeRange is not None :     #ture = TimeRange is a time range or an empty time range ; false = TimeRange is None
             self.OutApp.operator_tClose()
          else :
             maxi=len(self.CatList)
@@ -158,10 +160,10 @@ class sp :
             #for InApp in self.CatList :
                #if self.OutApp.TimeCells[-1] == InApp.TimeCells[0] or self.OutApp.TimeCells[0] == InApp.TimeCells[1] : 
                   if self.OutApp.IsAdiacent(InApp) :
-                     self.OutApp.operator_tAdd(InApp,self.TimeAverage)
+                     self.OutApp.operator_tAdd(InApp)
                   else :
                      self.CatList.append(InApp)
-         if len(self.CatList) != 0 : print 'ERROR 1 : wrong input'
+         if len(self.CatList) != 0 : print 'ERROR 1 : wrong input ', len(self.CatList)
          print >>sys.stderr, 'WARNING 1: something to improve...'  # in ch ordine tclose e operator_s
          if self.SpeedUp and (self.OutputLayer is not None or self.OutLonLat is not None ) :
             self.OutApp.operator_s(self.OutputLayer,self.OutLonLat)

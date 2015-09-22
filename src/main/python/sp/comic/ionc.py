@@ -148,21 +148,22 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
 #   TimeCells[TimeCells.size-1]=netCDF4.date2num(dtLast,units='hours since 1900-01-01 00:00:00',calendar='standard')
 ### READ MONTHLY FILE : END
 ### READ DAILY FILE : START
+   print >>sys.stderr, 'WARNING 17 : possible issue to convert time counter from float to int64 '
    if MyDatasetTimeBnds is None :
       dtTmp=netCDF4.num2date(MyDatasetTime[:],units=MyDatasetTime.units,calendar=MyDatasetTime.calendar)
       dtStart=dtTmp-datetime.timedelta(hours=12)
       dtLast=dtTmp[dtTmp.size-1]+datetime.timedelta(hours=12)
       TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
-      TimeCells[:TimeCells.size-1]=netCDF4.date2num(dtStart,units='hours since 1900-01-01 00:00:00',calendar='standard')
-      TimeCells[TimeCells.size-1]=netCDF4.date2num(dtLast,units='hours since 1900-01-01 00:00:00',calendar='standard')
+      TimeCells[:TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtStart,units='hours since 1900-01-01 00:00:00',calendar='standard'))
+      TimeCells[TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtLast,units='hours since 1900-01-01 00:00:00',calendar='standard'))
    else :
       dtTmp_bnds=netCDF4.num2date(MyDatasetTimeBnds[:,:],units=MyDatasetTime.units,calendar=MyDatasetTime.calendar)
       if isClimatology :
-         TimeCells=netCDF4.date2num(dtTmp_bnds,units='hours since 1900-01-01 00:00:00',calendar='standard')
+         TimeCells=numpy.rint(netCDF4.date2num(dtTmp_bnds,units='hours since 1900-01-01 00:00:00',calendar='standard'))
       else : 
          TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
-         TimeCells[:TimeCells.size-1]=netCDF4.date2num(dtTmp_bnds[:,0],units='hours since 1900-01-01 00:00:00',calendar='standard')
-         TimeCells[-1]=netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard')
+         TimeCells[:TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtTmp_bnds[:,0],units='hours since 1900-01-01 00:00:00',calendar='standard'))
+         TimeCells[-1]=numpy.rint(netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard'))
 ### READ DAILY FILE : END
 
    MyDataset.close()
@@ -190,7 +191,7 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    #OutDataset = netCDF4.Dataset('testout_nc3c.nc', 'w', format='NETCDF3_CLASSIC')  #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
    #OutDataset = netCDF4.Dataset('testout_nc3x.nc', 'w', format='NETCDF3_64BIT')    #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
 
-   OutDataset.history = 'Created ' + time.ctime(time.time())
+   OutDataset.history = 'Created by COMIC ' + time.ctime(time.time())
    OutDataset.Conventions = "CF-1.6"
 
    #print Out.shape

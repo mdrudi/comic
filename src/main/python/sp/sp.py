@@ -20,11 +20,18 @@ from comic import bmmng as sp_bm
 
 ##### PUBLIC FUNCTIONALITIES : START
 
-def ParseRange ( opt ) :
+def ParseRange ( opt , Time=False ) :
    import numpy
    import json
    #return numpy.array(map(float,opt.replace(" ","").replace("[","").replace("]","").split(",")))
-   return numpy.array(json.loads(opt))
+   if Time :
+      import datetime
+      tmpList=json.loads(opt)
+      for i in range(len(tmpList)) :
+         tmpList[i]=datetime.datetime.strptime(tmpList[i],"%Y-%m-%d %H:%M")
+   else :
+      tmpList=json.loads(opt)
+   return numpy.array(tmpList)
 
 def GetLine(opt_bm,keyPattern=None,stream=sys.stdin) :
    import sys
@@ -64,8 +71,12 @@ def EchoOutputFile(text,key=None) :
    print >>sys.stderr, 'Output File :',text
 
 def NoneOrList(ar) :
+   import datetime
    if ar is None : return None
-   return ar.tolist()
+   if len(ar) and type(ar[0]) is datetime.datetime :
+      return ar
+   else :
+      return ar.tolist()
 
 ##### PUBLIC FUNCTIONALITIES : END
 
@@ -102,7 +113,7 @@ class tag_op :
       parser.add_option("--iattrf",    dest="AttrFile",        default=None,     metavar="AttrFile",     help="optional - file with template for metadata in output netcdf file")
       parser.add_option("--iattrs",    dest="AttrStr",         default=None,     metavar="AttrStr",      help="optional - string with template for metadata in output netcdf file")
       parser.add_option("--ofile",     dest="MyOutFile",       default="out.nc", metavar="OutFile",      help="optional - file name for output or postfix in case of multiple output files - default 'out.nc'")
-      parser.add_option("--oat",       dest="oat",             default=None,     action="store_true",    help="flag to activate the computation of average value over time")
+      parser.add_option("--oat",       dest="oat",             default=None,     metavar="OutTRange",    help="flag to activate the computation of average value over time range given here as parameter")
       parser.add_option("--oac",       dest="oac",             default=None,     action="store_true",    help="flag to activate the computation of climatological average value over time")
       parser.add_option("--oav",       dest="oav",             default=None,     metavar="OutLayer" ,    help="flag to activate the computation of average value over spatial depth layers given here as parameter") 
       parser.add_option("--oao",       dest="oao",             default=None,     action="store_true",    help="flag to activate the computation of average value over the spatial lon lat plane")
@@ -131,6 +142,11 @@ class tag_op :
          options.MyOutputLon=params.MyOutputLon
          if ~ hasattr(params,"MyOutputLat") : params.MyOutputLat=None
          options.MyOutputLat=params.MyOutputLat
+
+      if options.oat is not None :
+         self.OutTRange=ParseRange(options.oat,Time=True)
+      else :
+         self.OutTRange=None
 
       if options.oav is not None :
          self.OutLayer=ParseRange(options.oav) 
@@ -168,7 +184,6 @@ class tag_op :
       self.bm=options.bm
       self.s=options.SpeedUp
       self.v=options.verbose
-      self.oat=options.oat
       self.oac=options.oac
       self.oKey=options.oKey
       self.AttrFile=options.AttrFile
@@ -226,7 +241,8 @@ def main():
       opt.oao=None
    
    VSpaceAverage=(opt.OutLayer is not None) 
-   TimeAverage=(opt.oat is not None or opt.oac is not None)
+   TimeAverage=(opt.OutTRange is not None or opt.oac is not None)
+   if TimeAverage and opt.OutTRange is None : opt.OutTRange=ParseRange('[]')
    OSpaceAverage=(opt.oao is not None) 
    FieldComputation=(opt.OutField is not None)
    One2One=(opt.InFile != 'list')
@@ -244,7 +260,7 @@ def main():
    print >>sys.stderr, " Depth Range     :  None"
    print >>sys.stderr, " Lon x Lat Range : ", NoneOrList(opt.LonLat)    #.tolist()
    print >>sys.stderr, "\nComputation"
-   print >>sys.stderr, " Grid - Time      : ", opt.oat
+   print >>sys.stderr, " Grid - Time      : ", NoneOrList(opt.OutTRange)
    print >>sys.stderr, " Grid - Climatological Time      : ", opt.oac
    print >>sys.stderr, " Grid - Layer     : ", NoneOrList(opt.OutLayer)  #.tolist()
    print >>sys.stderr, " Grid - Lon x Lat : ", opt.oao
@@ -288,9 +304,9 @@ def main():
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
                if FieldComputation :
-                  my_sp=comic.pilot(opt.OutField,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+                  my_sp=comic.pilot(opt.OutField,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
                else :
-                  my_sp=comic.pilot(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )   
+                  my_sp=comic.pilot(opt.Variables,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )   
                Many2OneBlock(opt.bm,my_sp,InputFileName,None,type="stream",outputKey=opt.oKey)
                InputFileName=GetLine(opt.bm,keyPattern)
             #if one :
@@ -299,13 +315,13 @@ def main():
          else : #in this case must be InputFileName[-3:]==".nc"
             print >>sys.stderr, "Processing simple..."
             if FieldComputation :
-               my_sp=comic.pilot(opt.OutField,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+               my_sp=comic.pilot(opt.OutField,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
             else :
-               my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+               my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , ClimatologicalAverage=opt.oac  , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
             Many2OneBlock(opt.bm,my_sp,InputFileName,keyPattern,outputKey=opt.oKey)
    # many files to many files
    elif Many2Many : 
-      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=GetLine(opt.bm,keyPattern)
       while InputFileName :
          EchoInputFile(InputFileName)
@@ -316,7 +332,7 @@ def main():
 
    # one file to one file
    elif One2One : 
-      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeAverage=TimeAverage , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
+      my_sp=comic.pilot(opt.Variables,opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
       InputFileName=opt.InFile
       EchoInputFile(InputFileName)
       OutputFileName=my_sp.once(InputFileName)
