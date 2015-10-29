@@ -50,9 +50,32 @@ def GiveOutFile(myGroup,GroupRange,lib,Dump=False,key=None) :
          else : mymr.PushRecord(os.getcwd()+'/'+out_file_name,(key,))
          sys.stdout.flush()
 
+def UpdateList(InputPathFileName,myGroup,lib,GroupRange,oKey) :
+   if myGroup in lib.keys() :
+      list_files=lib[myGroup]
+      list_files.append(InputPathFileName)
+   else :
+      list_files=list()
+      list_files.append(InputPathFileName)
+      lib[myGroup]=list_files
+
+   #to close and publish soon
+   DoIt=False
+   if GroupRange==6 :
+      from calendar import monthrange
+      #print len(lib[myGroup]),monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1] , monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1]+1
+      if len(lib[myGroup]) == monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1]+1 : DoIt=True
+   elif GroupRange==4 : #here is GroupRange=4
+      #nyyyy=365
+      #if isleap(int(myGroup[0:4])) : nyyyy=366
+      if len(lib[myGroup]) == 12 : DoIt=True
+   if DoIt :
+      GiveOutFile(myGroup,GroupRange,lib,key=oKey)
+      del lib[myGroup]
+
 
 def main():
-   from calendar import monthrange,isleap
+   #from calendar import monthrange,isleap
    try : 
       os.chdir(os.environ['TMPDIR'])
       print >>sys.stderr, "Change dir to", os.environ['TMPDIR'] 
@@ -82,34 +105,30 @@ def main():
    #InputPathFileName=GetLine(iKey)
    InputPathFileName=mymr.PullValue(iKey)
    while InputPathFileName :
+      myGroup6=None
       import re
       InputFileName=os.path.basename(InputPathFileName)      
       if GroupRange==2 :
          myGroup=InputFileName[4:6] 
       else :
          myGroup=InputFileName[0:GroupRange]
-      if myGroup in lib.keys() :
-         list_files=lib[myGroup]
-         list_files.append(InputPathFileName)
-      else :
-         list_files=list()
-         list_files.append(InputPathFileName)
-         lib[myGroup]=list_files
+         if GroupRange==6 and InputFileName[GroupRange:GroupRange+2]=='01' : 
+            import datetime
+            a=datetime.datetime(int(InputFileName[0:4]),int(InputFileName[4:6]),1)
+            b=a-datetime.timedelta(1)
+            myGroup6=b.strftime("%Y%m")  #to catch the previous calendar month when yyyymm01
+
       print >>sys.stderr, "Input ",InputPathFileName
+      UpdateList(InputPathFileName,myGroup,lib,GroupRange,oKey)
       print >>sys.stderr, myGroup,InputFileName
-      DoIt=False
-      if GroupRange==6 :
-         if len(lib[myGroup]) == monthrange(int(myGroup[0:4]),int(myGroup[4:6]))[1] : DoIt=True
-      elif GroupRange==4 : #here is GroupRange=4
-         #nyyyy=365
-         #if isleap(int(myGroup[0:4])) : nyyyy=366
-         if len(lib[myGroup]) == 12 : DoIt=True
-      if DoIt : 
-         GiveOutFile(myGroup,GroupRange,lib,key=oKey)
-         del lib[myGroup]
-      #InputPathFileName=GetLine(iKey)
+      if GroupRange==6 and myGroup6 is not None : 
+         UpdateList(InputPathFileName,myGroup6,lib,GroupRange,oKey)
+         print >>sys.stderr, myGroup6,InputFileName
+
       InputPathFileName=mymr.PullValue(iKey)
 
+
+   #final closure and publication
    for myGroup in lib.keys() :
       if GroupRange==2 :
          GiveOutFile(myGroup,GroupRange,lib,key=oKey)

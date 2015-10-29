@@ -130,7 +130,7 @@ sPar(defaultParameters,'iKey','\.txt$')
 sPar(defaultParameters,'Var','votemper',title="Parameter",abstract="Parameter", scope="runtime")
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
-sPar(defaultParameters,'oat','True')
+sPar(defaultParameters,'oat','[]')
 #sPar(defaultParameters,'OutLayer','')
 #sPar(defaultParameters,'oao','')
 #sPar(defaultParameters,'otc','')
@@ -343,6 +343,7 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
+sPar(parameters,'oat','["i6"]')
 sPar(parameters,'AttrStr','{"votemper": {"long_name": "monthly mean map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "monthly mean map","institution": "MELODIES WP6 ACS INGV"}}')
 
 #sPar(parameters,'OutFile','last'+strYYYYMM+'.nc')

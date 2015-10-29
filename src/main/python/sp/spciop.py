@@ -173,14 +173,26 @@ def main():
    #my_sp=sp.sp(opt['Var'],opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeAverage=TimeAverage , RemoveInput=opt['iClean'])
 
    if Many2One :
+      flagOutTRange=0
       #one=False
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
+            if len(opt['OutTRange'])==1 :
+               if opt['OutTRange'][0]=='i6' : flagOutTRange=6
             while InputFileName :
                LocalInputFileName = GetInput(InputFileName)
                print "Processing group..."+LocalInputFileName
                sp.EchoInputFile(LocalInputFileName)
+               if flagOutTRange==6 :
+                  import numpy
+                  import datetime
+                  from calendar import monthrange
+                  first=datetime.datetime(int(LocalInputFileName[0:4]),int(LocalInputFileName[4:6]),1)
+                  last=datetime.datetime(int(LocalInputFileName[0:4]),int(LocalInputFileName[4:6]), monthrange(int(LocalInputFileName[0:4]),int(LocalInputFileName[4:6]))[1]  )
+                  first1m=last+datetime.timedelta(1)
+                  opt['OutTRange']=numpy.array([ first , first1m ])
+                  print " Grid - Time REDEF: ", sp.NoneOrList(opt['OutTRange'])
                if FieldComputation :
                   my_sp=comic.pilot(opt['OutField'],LocalInputFileName+opt['OutFile'],opt['LonLat'],opt['OutLayer'],opt['bm'],opt['s'],OutLonLat=opt['oao'], TimeRange=opt['OutTRange'], ClimatologicalAverage=opt['oac'], RemoveInput=opt['iClean'], AttrStr=opt['AttrStr'])
                else :

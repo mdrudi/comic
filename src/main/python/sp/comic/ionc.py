@@ -27,6 +27,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    #mv=getattr(MyDatasetVariable,'missing_value')
    #print 'mv',mv
 
+   MyDatasetDepth=None
    for tV in MyDatasetVariable.dimensions :
       #print MyDataset.variables[tV].standard_name
       if MyDataset.variables[tV].standard_name == 'latitude' :
@@ -73,26 +74,32 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    #print 'XYZ',MyDatasetLon,MyDatasetLat
    #build layer
    print >>sys.stderr, "WARNING 4 : not able to read depth boundaries"
-   MyDatasetDepthLayer=numpy.insert(MyDatasetDepth[:],0,0)
-   for i in range(MyDatasetDepth[:].size) :
-      MyDatasetDepthLayer[i+1]=MyDatasetDepth[i]*2-MyDatasetDepthLayer[i] #prev
-   if af64MyOutputLayer is not None :
+
+   if MyDatasetDepth is not None :
+      MyDatasetDepthLayer=numpy.insert(MyDatasetDepth[:],0,0)
+      for i in range(MyDatasetDepth[:].size) :
+         MyDatasetDepthLayer[i+1]=MyDatasetDepth[i]*2-MyDatasetDepthLayer[i] #prev
+      if af64MyOutputLayer is not None :
       #MyDatasetDepthLayer=numpy.insert(MyDatasetDepth[:],0,0)
       #for i in range(MyDatasetDepth[:].size) :
       #   MyDatasetDepthLayer[i+1]=MyDatasetDepth[i]*2-MyDatasetDepthLayer[i] #prev
    #print "mmm",MyDatasetDepthLayer.size,MyDatasetDepthLayer
 
-      MyInputDepthIndex=sp_type.FindIndex(MyDatasetDepthLayer,af64MyOutputLayer.min(),af64MyOutputLayer.max())
-      if sp_glob.verbose : print >>sys.stderr, 'Depth Index :',MyInputDepthIndex
+         MyInputDepthIndex=sp_type.FindIndex(MyDatasetDepthLayer,af64MyOutputLayer.min(),af64MyOutputLayer.max())
+         if sp_glob.verbose : print >>sys.stderr, 'Depth Index :',MyInputDepthIndex
       #MyInputDepthIndex[1]=MyInputDepthIndex[1]+1
       #if MyInputDepthIndex[0]>0 : MyInputDepthIndex[0]=MyInputDepthIndex[0]-1
-      MyDatasetDepthLayer=MyDatasetDepthLayer[MyInputDepthIndex[0]:MyInputDepthIndex[1]+1]
-   else :
-      MyInputDepthIndex=(0,MyDatasetDepth.size)
+         MyDatasetDepthLayer=MyDatasetDepthLayer[MyInputDepthIndex[0]:MyInputDepthIndex[1]+1]
+      else :
+         MyInputDepthIndex=(0,MyDatasetDepth.size)
    #   MyDatasetDepthLayer=numpy.insert(MyDatasetDepth[:],0,0)
    #if sp_glob.verbose : print MyDatasetDepthLayer
    #MyDatasetVariable=MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy()
-   MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
+
+   if MyDatasetDepth is None :
+      MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
+   else :
+      MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
    #print 'YYY1',type(MyDatasetVariable)
    #print 'm',MyDatasetVariable.mask[0,0,:,0]
    #LandMask=(MyDatasetVariable == mv)
@@ -170,7 +177,10 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    if RemoveInput : os.remove(MyInputFile)
 
    #print 'YYY',type(MyDatasetVariable),MyDatasetDepthLayer.size,MyDatasetVariable.shape
-   ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
+   if MyDatasetDepth is None :
+      ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,None,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
+   else :
+      ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)
    if isClimatology : ChTMP.ClimatologicalField=True #setAsClimatologicalField()
    return ChTMP
 

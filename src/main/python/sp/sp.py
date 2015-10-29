@@ -27,8 +27,13 @@ def ParseRange ( opt , Time=False ) :
    if Time :
       import datetime
       tmpList=json.loads(opt)
-      for i in range(len(tmpList)) :
-         tmpList[i]=datetime.datetime.strptime(tmpList[i],"%Y-%m-%d %H:%M")
+      if len(tmpList) == 1 :
+         #print tmpList,type(tmpList),tmpList[0],list((tmpList[0],)),[tmpList[0],]
+         return numpy.array(tmpList) #
+         #return [tmpList[0],]
+      else :
+         for i in range(len(tmpList)) :
+            tmpList[i]=datetime.datetime.strptime(tmpList[i],"%Y-%m-%d %H:%M")
    else :
       tmpList=json.loads(opt)
    return numpy.array(tmpList)
@@ -75,8 +80,8 @@ def NoneOrList(ar) :
    if ar is None : return None
    if len(ar) and type(ar[0]) is datetime.datetime :
       return ar
-   else :
-      return ar.tolist()
+   elif type(ar)==type(list()) : return ar    #for special coding in time range definition
+   else : return ar.tolist()
 
 ##### PUBLIC FUNCTIONALITIES : END
 
@@ -295,14 +300,26 @@ def main():
 
    # many files to one file
    if Many2One : 
+      flagOutTRange=0
       #one=False
       InputFileName=GetLine(opt.bm,keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
+            if len(opt.OutTRange)==1 :
+               if opt.OutTRange[0]=='i6' : flagOutTRange=6
             while InputFileName :
                #one=True
                print >>sys.stderr, "Processing group..."+InputFileName 
                EchoInputFile(InputFileName)
+               if flagOutTRange==6 :
+                  import numpy
+                  import datetime
+                  from calendar import monthrange
+                  first=datetime.datetime(int(InputFileName[0:4]),int(InputFileName[4:6]),1)
+                  last=datetime.datetime(int(InputFileName[0:4]),int(InputFileName[4:6]), monthrange(int(InputFileName[0:4]),int(InputFileName[4:6]))[1]  )
+                  first1m=last+datetime.timedelta(1)
+                  opt.OutTRange=numpy.array([ first , first1m ])
+                  print >>sys.stderr, " Grid - Time REDEF: ", NoneOrList(opt.OutTRange)
                if FieldComputation :
                   my_sp=comic.pilot(opt.OutField,os.path.basename(InputFileName)+opt.OutFile,opt.LonLat,opt.OutLayer,opt.bm,opt.s, OutLonLat=opt.oao , TimeRange=opt.OutTRange , ClimatologicalAverage=opt.oac , RemoveInput=opt.iClean , AttrFile=opt.AttrFile , AttrStr=opt.AttrStr )
                else :
