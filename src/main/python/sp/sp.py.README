@@ -43,3 +43,43 @@ mv out.nc out_sal.nc
 ls $PWD/out_* > inputfile.txt
 cat inputfile.txt 
 python sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5, 45.5]] ]' --oav='[0,10,50,100,500,1000,2000]'  --bm --ofc density < inputfile.txt
+
+
+
+
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/01-mapcomic2.txt.nc < in-01-mapcomic2.txt
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/198701-mapcomic6.txt.nc < in-198701-mapcomic6.txt
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/out4.txt.nc < in-out4.txt
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/out6.txt.nc < in-out6.txt
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/out_m_12.txt.nc < in-out_m_12.txt
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile outd/out_ts_12.txt.nc < in-out_ts_12.txt
+
+#in-01-mapcomic2.txt
+#in-198701-mapcomic6.txt
+#in-out4.txt
+#in-out6.txt
+#in-out_m_12.txt
+#in-out_ts_12.txt
+
+#[melodies-wp6@sb-10-15-27-13 arc]$ cat in-*
+#/home/melodies-wp6/ncpi/scratch/arc/dt/01-mapcomic2.txt.out.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/01-mapcomic2.txt.out.nc
+#/home/melodies-wp6/ncpi/scratch/arc/dt/198701-mapcomic6.txt.out.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/198701-mapcomic6.txt.out.nc
+#/home/melodies-wp6/ncpi/scratch/arc/dt/out4.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/out4.nc
+#/home/melodies-wp6/ncpi/scratch/arc/dt/out6.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/out6.nc
+#/home/melodies-wp6/ncpi/scratch/arc/dt/out_m_12.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/out_m_12.nc
+#/home/melodies-wp6/ncpi/scratch/arc/ds/out_ts_12.nc
+#/home/melodies-wp6/ncpi/scratch/arc/dt/out_ts_12.nc
+
+
+# cp -p mtc_m_ct/data/01-mapcomic2.txt.out.nc /home/melodies-wp6/ncpi/scratch/arc/dt/
+# cp -p mty_r_oa/data/out4.nc /home/melodies-wp6/ncpi/scratch/arc/dt
+# cp -p mtmg_r_om/data/out6.nc /home/melodies-wp6/ncpi/scratch/arc/dt
+# cp -p mtc_r_ct/data/out_m_12.nc /home/melodies-wp6/ncpi/scratch/arc/dt
+# cp -p mtc_r_oa/data/out_ts_12.nc /home/melodies-wp6/ncpi/scratch/arc/dt
+# cp -p mtmg_m_tm/data/198701-mapcomic6.txt.out.nc /home/melodies-wp6/ncpi/scratch/arc/dt
+

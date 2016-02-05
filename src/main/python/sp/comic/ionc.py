@@ -7,8 +7,11 @@ from . import type as sp_type
 from . import glob as sp_glob
 #import sp_glob
 
+celltype_value=dict(daily_mean_map='daily_mean_map', monthly_mean_map='monthly_mean_map', \
+                    monthly_climatology_map='monthly_climatology_map', seasonal_climatology_timeseries='seasonal_climatology_timeseries', \
+                    annual_climatology_map='annual_climatology_map', average_annual_mean_timeseries='average_annual_mean_timeseries')
 
-def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False) :  
+def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False,NoData=False) :  
    import netCDF4
    import numpy
    import os
@@ -96,10 +99,16 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    #if sp_glob.verbose : print MyDatasetDepthLayer
    #MyDatasetVariable=MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy()
 
-   if MyDatasetDepth is None :
-      MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
+
+   if NoData :
+      MyDatasetVariable=None
+      print >>sys.stderr, 'WARNING 19 : no need to read actual data from file...'
+      print >>sys.stderr, 'WARNING 20 : still allocating room in memory...'
    else :
-      MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
+      if MyDatasetDepth is None :
+         MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
+      else :
+         MyDatasetVariable=numpy.ma.asarray(MyDatasetVariable[:,MyInputDepthIndex[0]:MyInputDepthIndex[1],MyOutputLatIndex[0]:MyOutputLatIndex[1],MyOutputLonIndex[0]:MyOutputLonIndex[1]].copy())
    #print 'YYY1',type(MyDatasetVariable)
    #print 'm',MyDatasetVariable.mask[0,0,:,0]
    #LandMask=(MyDatasetVariable == mv)
@@ -163,6 +172,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
       TimeCells[:TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtStart,units='hours since 1900-01-01 00:00:00',calendar='standard'))
       TimeCells[TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtLast,units='hours since 1900-01-01 00:00:00',calendar='standard'))
+      MyCelltype=celltype_value['daily_mean_map']
    else :
       dtTmp_bnds=netCDF4.num2date(MyDatasetTimeBnds[:,:],units=MyDatasetTime.units,calendar=MyDatasetTime.calendar)
       if isClimatology :
@@ -173,15 +183,25 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
          TimeCells[-1]=numpy.rint(netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard'))
 ### READ DAILY FILE : END
 
-   MyDataset.close()
-   if RemoveInput : os.remove(MyInputFile)
-
    #print 'YYY',type(MyDatasetVariable),MyDatasetDepthLayer.size,MyDatasetVariable.shape
    if MyDatasetDepth is None :
       ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,None,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
    else :
       ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)
    if isClimatology : ChTMP.ClimatologicalField=True #setAsClimatologicalField()
+
+   try :
+      ChTMP.created=MyDataset.bulletin_date
+   except : pass
+
+   try :
+      ChTMP.celltype=MyCelltype
+      print >>sys.stderr, 'WARNING 18 : need of a complete definition of celltype '
+   except : pass
+
+   MyDataset.close()
+   if RemoveInput : os.remove(MyInputFile)
+
    return ChTMP
 
 

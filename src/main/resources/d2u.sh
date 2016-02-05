@@ -19,7 +19,7 @@ lul() {
    while read filename; do
       echo $filename >> $0.list_lul
       s3cmd put $filename $1
-      #rm $filename
+      rm $filename
       done
    }
 
@@ -30,4 +30,26 @@ lul() {
 #lls $Source/2010* | ldl $Source | lul $Dest/2010/
 #lls $Source/2011* | ldl $Source | lul $Dest/2011/
 #lls $Source/2012* | ldl $Source | lul $Dest/2012/
+
+#lls $Source/yr2012/* | ldl $Source/yr2012 yr2012 | lul $Dest/2012s/
+#lls $Source/yr2011/* | ldl $Source/yr2011 yr2011 | lul $Dest/2011s/
+#lls $Source/yr2010/* | ldl $Source/yr2010 yr2010 | lul $Dest/2010s/
+
+#for tYYYY in 2013 ; do
+#   #tYYYY=2010
+#   sTot=$Source/yr$tYYYY
+#   tDir=$tYYYY
+#   dDir=$Dest/${tYYYY}s/
+#   lls $sTot/* | ldl $sTot $tDir | lul $dDir
+#   done
+
+Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-cur-rean-dm"
+
+for tYYYY in 2013 ; do
+   #tYYYY=2010
+   sTot=$Source/yr$tYYYY
+   tDir=$tYYYY
+   dDir=$Dest/${tYYYY}c/
+   lls $sTot/* | ldl $sTot $tDir | lul $dDir
+   done
 
