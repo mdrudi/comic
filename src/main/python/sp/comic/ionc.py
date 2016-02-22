@@ -227,9 +227,17 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    #print Out.shape
    OutDataset.setncatts(AncillaryAttr)
    OutDataset.createDimension('time',None)
-   OutDataset.createDimension('depth',Out.shape[1])
-   OutDataset.createDimension('lat',Out.shape[2])
-   OutDataset.createDimension('lon',Out.shape[3])
+   if len(Out.shape) == 4 :
+      OutDataset.createDimension('depth',Out.shape[1])
+      OutDataset.createDimension('lat',Out.shape[2])
+      OutDataset.createDimension('lon',Out.shape[3])
+      os_lat=2
+      os_lon=3
+   else :
+      OutDataset.createDimension('lat',Out.shape[1])
+      OutDataset.createDimension('lon',Out.shape[2])
+      os_lat=1
+      os_lon=2
    OutDataset.createDimension('nv',2)
 
    #print OutDataset.dimensions
@@ -243,15 +251,22 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    OutDataset.createVariable('time','i4',('time')) #,fill_value=None)   #WARNING : i8 mandatory to store seconds sice...but require nc4
    OutDataset.createVariable('lon','f4',('lon'),zlib=True,complevel=9)
    OutDataset.createVariable('lat','f4',('lat'),zlib=True,complevel=9)
-   OutDataset.createVariable('depth','f4',('depth'),zlib=True,complevel=9)
-   OutDataset.createVariable('depth_bnds','f4',('depth','nv'),zlib=True,complevel=9)
+   if len(Out.shape) == 4 :
+      OutDataset.createVariable('depth','f4',('depth'),zlib=True,complevel=9)
+      OutDataset.createVariable('depth_bnds','f4',('depth','nv'),zlib=True,complevel=9)
    OutDataset.createVariable('lon_bnds','f4',('lon','nv'),zlib=True,complevel=9)
    OutDataset.createVariable('lat_bnds','f4',('lat','nv'),zlib=True,complevel=9)
    if cOut.ClimatologicalField :
       OutDataset.createVariable('climatology_bnds','i4',('time','nv'))
    else :
       OutDataset.createVariable('time_bnds','i4',('time','nv'))
-   OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
+   if len(Out.shape) == 4 :
+      ldime=('time','depth','lat','lon')
+   else :
+      ldime=('time','lat','lon')
+   #OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
+   OutDataset.createVariable(cOut.VariableName,'f4',ldime,zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
+   
 
    tmpOutTemp=OutDataset.variables[cOut.VariableName]
    #tmpOutTemp.coordinates="time depth lat lon"
@@ -265,23 +280,27 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    if cOut.ClimatologicalField : tmpOutTemp.cell_methods="time: sum within years time: mean over years"
    if cOut.StandardName == 'sea_water_potential_temperature' :
       tmpOutTemp.units="degC"
-   tmpOutTemp[:,:,:,:]=Out
+   if len(Out.shape) == 4 :
+      tmpOutTemp[:,:,:,:]=Out
+   else :
+      tmpOutTemp[:,:,:]=Out
 
 #   OutDataset.createVariable('depth','f4',('depth'),zlib=True,complevel=9)
-   tmpOutD=OutDataset.variables['depth']
-   tmpOutD.units='m'
-   tmpOutD.positive='down'
-   tmpOutD.long_name='depth'
-   tmpOutD.axis='Z'
-   tmpOutD.standard_name='depth'
-   tmpOutD.bounds='depth_bnds'
-   tmpOutD.valid_min=numpy.float32(DepthLayer.min())
-   tmpOutD.valid_max=numpy.float32(DepthLayer.max())
-   #print DepthLayer,tmpOutD.size,DepthLayer[:Out.shape[1]].size,DepthLayer[1:].size
-   tmpOutD[:]=(DepthLayer[:Out.shape[1]]+DepthLayer[1:])/2
+   if len(Out.shape) == 4 :
+      tmpOutD=OutDataset.variables['depth']
+      tmpOutD.units='m'
+      tmpOutD.positive='down'
+      tmpOutD.long_name='depth'
+      tmpOutD.axis='Z'
+      tmpOutD.standard_name='depth'
+      tmpOutD.bounds='depth_bnds'
+      tmpOutD.valid_min=numpy.float32(DepthLayer.min())
+      tmpOutD.valid_max=numpy.float32(DepthLayer.max())
+      #print DepthLayer,tmpOutD.size,DepthLayer[:Out.shape[1]].size,DepthLayer[1:].size
+      tmpOutD[:]=(DepthLayer[:Out.shape[1]]+DepthLayer[1:])/2
 
 #   OutDataset.createVariable('depth_bnds','f4',('depth','nv'),zlib=True,complevel=9)
-   tmpOutDB=OutDataset.variables['depth_bnds']
+      tmpOutDB=OutDataset.variables['depth_bnds']
 #   tmpOutDB.units='m'
 #   tmpOutDB.positive='down'
 #   tmpOutDB.long_name='boundaries of cells in depth '
@@ -289,8 +308,8 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
 #   tmpOutDB.standard_name='depth_lower_limit'
 #   tmpOutDB.valid_min=numpy.float32(DepthLayer.min())
 #   tmpOutDB.valid_max=numpy.float32(DepthLayer.max())
-   tmpOutDB[:,0]=DepthLayer[:Out.shape[1]]
-   tmpOutDB[:,1]=DepthLayer[1:]
+      tmpOutDB[:,0]=DepthLayer[:Out.shape[1]]
+      tmpOutDB[:,1]=DepthLayer[1:]
 
 
 #   OutDataset.createVariable('depth_lower_limit','f4',('depth'),zlib=True,complevel=9)
@@ -327,13 +346,13 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    tmpOutLo.valid_min=numpy.float32(cOut.LonCells.min())
    tmpOutLo.valid_max=numpy.float32(cOut.LonCells.max())
    #print 'XXX',cOut.LonCells,cOut.LonCells.size
-   tmpOutLo[:]=(cOut.LonCells[:Out.shape[3]]+cOut.LonCells[1:])/2
+   tmpOutLo[:]=(cOut.LonCells[:Out.shape[os_lon]]+cOut.LonCells[1:])/2
 
    #OutDataset.createVariable('lat','f4',('lat'),zlib=True,complevel=9)
 
    #OutDataset.createVariable('lon_bnds','f4',('lon','nv'),zlib=True,complevel=9)
    tmpOutLoB=OutDataset.variables['lon_bnds']
-   tmpOutLoB[:,0]=cOut.LonCells[:Out.shape[3]]
+   tmpOutLoB[:,0]=cOut.LonCells[:Out.shape[os_lon]]
    tmpOutLoB[:,1]=cOut.LonCells[1:]
 
    #OutDataset.createVariable('lat','f4',('lat'),zlib=True,complevel=9)
@@ -345,11 +364,11 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    tmpOutLa.bounds='lat_bnds'
    tmpOutLa.valid_min=numpy.float32(cOut.LatCells.min())
    tmpOutLa.valid_max=numpy.float32(cOut.LatCells.max())
-   tmpOutLa[:]=(cOut.LatCells[:Out.shape[2]]+cOut.LatCells[1:])/2
+   tmpOutLa[:]=(cOut.LatCells[:Out.shape[os_lat]]+cOut.LatCells[1:])/2
 
    #OutDataset.createVariable('lat_bnds','f4',('lat','nv'),zlib=True,complevel=9)
    tmpOutLaB=OutDataset.variables['lat_bnds']
-   tmpOutLaB[:,0]=cOut.LatCells[:Out.shape[2]]
+   tmpOutLaB[:,0]=cOut.LatCells[:Out.shape[os_lat]]
    tmpOutLaB[:,1]=cOut.LatCells[1:]
 
    tmpOutT=OutDataset.variables['time']
