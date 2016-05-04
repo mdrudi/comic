@@ -45,7 +45,7 @@ lul() {
 
 Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-cur-rean-dm"
 
-for tYYYY in 2013 ; do
+for tYYYY in 1996 1997 1998 1999 ; do
    #tYYYY=2010
    sTot=$Source/yr$tYYYY
    tDir=$tYYYY

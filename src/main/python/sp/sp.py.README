@@ -83,3 +83,72 @@ python sp.py --ifile list --ifield=votemper --ilonlat='[  [[12.75, 13.0], [44.5,
 # cp -p mtc_r_oa/data/out_ts_12.nc /home/melodies-wp6/ncpi/scratch/arc/dt
 # cp -p mtmg_m_tm/data/198701-mapcomic6.txt.out.nc /home/melodies-wp6/ncpi/scratch/arc/dt
 
+
+
+
+
+---------1  To process one monthly mean from input file
+
+[melodies-wp6@sb-10-15-27-13 files_c]$ ls -1 *INGV*nc
+20091201_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091202_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091203_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091204_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091205_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091206_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091207_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091208_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091209_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091210_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091211_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091212_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091213_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091214_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091215_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091216_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091217_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091218_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091219_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091220_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091221_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091222_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091223_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091224_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091225_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091226_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091227_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091228_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091229_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091230_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20091231_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+20100101_dm-INGV--RFVL-MFSs4b3-MED-b20140620_re-fv05.00.nc
+
+
+
+for file in `ls *RFVL*.nc`; do
+   #echo $file
+   ofile=`echo $file | cut -c-8`_vozocrtx.nc
+   Cmd="python jt_vto/sp.py --ifile $file --ifield=vozocrtx --oav='[0,10,50,100,500,1000,2000]'  --bm --ofile $ofile"
+   echo $Cmd
+   eval $Cmd
+   ofile=`echo $file | cut -c-8`_vomecrty.nc
+   Cmd="python jt_vto/sp.py --ifile $file --ifield=vomecrty --oav='[0,10,50,100,500,1000,2000]'  --bm --ofile $ofile"
+   echo $Cmd
+   eval $Cmd
+   done
+
+ls 20*vozocrtx.nc > 200912-vozocrtx_group.txt #req.: i6 get the month to process from the first 6 char il filename
+
+Cmd="echo 200912-vozocrtx_group.txt | python jt_vto/sp.py --ifile list --ifield=vozocrtx --oat='[\"i6\"]' --bm "  #file *txt trig the group processing and keep into consideration i6 flag
+echo $Cmd
+eval $Cmd
+
+ls 20*vomecrty.nc > 200912-vomecrty_group.txt
+
+Cmd="echo 200912-vomecrty_group.txt | python jt_vto/sp.py --ifile list --ifield=vomecrty --oat='[\"i6\"]' --bm "
+echo $Cmd
+eval $Cmd
+
+---------1
+
+
