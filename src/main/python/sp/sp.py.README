@@ -152,3 +152,64 @@ eval $Cmd
 ---------1
 
 
+
+
+
+melodies-wp6@sb-10-15-27-13 atomic]$ cat inputfiles
+/home/melodies-wp6/ncpi/scratch/atomic/last198701.nc
+/home/melodies-wp6/ncpi/scratch/atomic/last198702.nc
+/home/melodies-wp6/ncpi/scratch/atomic/last198703.nc
+
+VERTICAL LAYERS (Map v)
+sp.py --ifile $file --ifield=vozocrtx --oav='[0,10,50,100,500,1000,2000]' --bm --ofile $ofile
+
+TIME CONCATENATION - MAP TIMESERIES
+sp.py --ifile list --ifield=votemper --otc --bm < inputfiles
+
+TIMESERIES (Reduce om , Reduce oa * 2)
+sp.py --ifile list --ifield=votemper --otc -oao --bm < inputfiles
+
+
+
+EXAMPLE TO COMPUTE A DIREVED FIELD
+
+NB plugin available in jt_vto/comic/processor/
+
+./jt_vto/sp.py --ifile list --bm --ofc density --ofile 198701-mapcomic6.txt.nc < in-198701-mapcomic6.txt
+
+#in-198701-mapcomic6.txt
+
+[melodies-wp6@sb-10-15-27-13 arc]$ cat in-*
+/home/melodies-wp6/ncpi/scratch/arc/dt/198701-mapcomic6.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/arc/ds/198701-mapcomic6.txt.out.nc
+
+
+[melodies-wp6@sb-10-15-27-13 atomic]$ cat inputfiles2
+/home/melodies-wp6/ncpi/scratch/atomic/last198701.nc
+/home/melodies-wp6/ncpi/scratch/atomic/last198801.nc
+/home/melodies-wp6/ncpi/scratch/atomic/last198901.nc
+/home/melodies-wp6/ncpi/scratch/atomic/last199001.nc
+
+
+MONTHLY CLIMATOLOGY (Map ct)
+./jt_vto/sp.py --ifile list --ifield=votemper --oac < inputfiles2
+
+
+cat inputfiles3 
+/home/melodies-wp6/ncpi/scratch/atomic/01-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/02-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/03-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/04-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/05-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/06-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/07-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/08-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/09-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/10-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/11-mapcomic2.txt.out.nc
+/home/melodies-wp6/ncpi/scratch/atomic/12-mapcomic2.txt.out.nc
+
+ANNUAL CLIMATOLOGY (Reduce ct)
+./jt_vto/sp.py --ifile list --ifield=votemper --oac < inputfiles3
+
+

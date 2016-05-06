@@ -43,13 +43,14 @@ lul() {
 #   lls $sTot/* | ldl $sTot $tDir | lul $dDir
 #   done
 
-Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-cur-rean-dm"
+#Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-cur-rean-dm"
+Source="ftp://cmems-med-mfc.eu/Core/MEDSEA_REANALYSIS_PHYS_006_004/cmemsv02-med-ingv-sal-rean-d"
 
-for tYYYY in 1996 1997 1998 1999 ; do
+for tYYYY in 2014 ; do
    #tYYYY=2010
    sTot=$Source/yr$tYYYY
    tDir=$tYYYY
-   dDir=$Dest/${tYYYY}c/
+   dDir=$Dest/${tYYYY}s/
    lls $sTot/* | ldl $sTot $tDir | lul $dDir
    done
 
