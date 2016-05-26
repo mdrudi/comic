@@ -265,14 +265,14 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    else :
       ldime=('time','lat','lon')
    #OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
-   OutDataset.createVariable(cOut.VariableName,'f4',ldime,zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
+   OutDataset.createVariable(cOut.VariableName,'f4',ldime,zlib=True,complevel=9,fill_value=Out.fill_value)
    
 
    tmpOutTemp=OutDataset.variables[cOut.VariableName]
    #tmpOutTemp.coordinates="time depth lat lon"
    tmpOutTemp.standard_name=cOut.StandardName
-   tmpOutTemp.valid_min=numpy.float32(math.floor(Out.min()))
-   tmpOutTemp.valid_max=numpy.float32(math.ceil(Out.max()))
+   tmpOutTemp.valid_min=numpy.float32(Out.min())
+   tmpOutTemp.valid_max=numpy.float32(Out.max())
    tmpOutTemp.missing_value=Out.fill_value
    tmpOutTemp.setncatts(cOut.AncillaryAttr)
 #for item in cOut.AncillaryAttr :
