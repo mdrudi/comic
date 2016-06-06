@@ -268,10 +268,10 @@ workflowVersion=ET.SubElement(workflow,'workflowVersion')
 workflowVersion.text='1.0'
 workflowVersion.tail='\n'
 
-# mtmg_r_ga
+# mtmg_r_gc
 
 node=ET.SubElement(workflow,'node')
-node.set('id','mtmg_r_ga')
+node.set('id','mtmg_r_gc')
 node.text='\n'
 node.tail='\n'
 
@@ -290,16 +290,16 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'GroupRange','4')
+sPar(parameters,'GroupRange','2')
 
-#mty_m_ta
+#mtc_m_ct
 
 node=ET.SubElement(workflow,'node')
-node.set('id','mty_m_ta')
+node.set('id','mtc_m_ct')
 node.text='\n'
 node.tail='\n'
 
-ET.SubElement(node,'job').set('id','jt_t')
+ET.SubElement(node,'job').set('id','jt_c')
 
 sources=ET.SubElement(node,'sources')
 sources.text='\n'
@@ -307,17 +307,45 @@ sources.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='mtmg_r_ga'
+source.text='mtmg_r_gc'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-#mty_r_oa
+sPar(parameters,'AttrStr','{"votemper": {"long_name": "monthly climatology map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "monthly climatology map","institution": "MELODIES WP6 ACS INGV"}}')
+
+#mtc_r_ct
 
 node=ET.SubElement(workflow,'node')
-node.set('id','mty_r_oa')
+node.set('id','mtc_r_ct')
+node.text='\n'
+node.tail='\n'
+
+ET.SubElement(node,'job').set('id','jt_c_r')
+
+sources=ET.SubElement(node,'sources')
+sources.text='\n'
+sources.tail='\n'
+
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mtc_m_ct'
+source.tail='\n'
+
+parameters=ET.SubElement(node,'parameters')
+parameters.text='\n'
+parameters.tail='\n'
+
+sPar(parameters,'iKey','mapcomic2(.*)(\.nc$)')
+sPar(parameters,'OutFile','out_m_12.nc')
+sPar(parameters,'AttrStr','{"votemper": {"long_name": "annual climatology map - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "annual climatology map","institution": "MELODIES WP6 ACS INGV"}}')
+
+#mtc_r_oa
+
+node=ET.SubElement(workflow,'node')
+node.set('id','mtc_r_oa')
 node.text='\n'
 node.tail='\n'
 
@@ -327,27 +355,23 @@ sources=ET.SubElement(node,'sources')
 sources.text='\n'
 sources.tail='\n'
 
-#for y in myRange :
-#   for m in ('01','02','03','04','05','06','07','08','09','10','11','12') :
-#      source=ET.SubElement(sources,'source')
-#      source.set('refid','wf:node')
-#      source.text='node_t_'+str(y)+m
-#      source.tail='\n'
-#      if y == endYear and m == endMonth : break
+source=ET.SubElement(sources,'source')
+source.set('refid','wf:node')
+source.text='mtc_m_ct'
+source.tail='\n'
 
 source=ET.SubElement(sources,'source')
 source.set('refid','wf:node')
-source.text='mty_m_ta'
+source.text='mtc_r_ct'
 source.tail='\n'
 
 parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
-sPar(parameters,'AttrStr','{"votemper": {"long_name": "average annual mean timeseries - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "average annual mean timeseries","institution": "MELODIES WP6 ACS INGV"}}')
-
+sPar(parameters,'iKey','mapcomic2(.*)(\.nc$)')
+sPar(parameters,'OutFile','out_ts_12.nc')
+sPar(parameters,'AttrStr','{"votemper": {"long_name": "seasonal climatology timeseries - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "seasonal climatology timeseries","institution": "MELODIES WP6 ACS INGV"}}')
 
 #ET.dump(application)
 print ET.tostring(application)

@@ -268,14 +268,14 @@ workflowVersion=ET.SubElement(workflow,'workflowVersion')
 workflowVersion.text='1.0'
 workflowVersion.tail='\n'
 
-# mtmg_r_ga
+# mtmg_r_om 
 
 node=ET.SubElement(workflow,'node')
-node.set('id','mtmg_r_ga')
+node.set('id','mtmg_r_om')
 node.text='\n'
 node.tail='\n'
 
-ET.SubElement(node,'job').set('id','jt_g')
+ET.SubElement(node,'job').set('id','jt_o')
 
 sources=ET.SubElement(node,'sources')
 sources.text='\n'
@@ -290,64 +290,9 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'GroupRange','4')
-
-#mty_m_ta
-
-node=ET.SubElement(workflow,'node')
-node.set('id','mty_m_ta')
-node.text='\n'
-node.tail='\n'
-
-ET.SubElement(node,'job').set('id','jt_t')
-
-sources=ET.SubElement(node,'sources')
-sources.text='\n'
-sources.tail='\n'
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mtmg_r_ga'
-source.tail='\n'
-
-parameters=ET.SubElement(node,'parameters')
-parameters.text='\n'
-parameters.tail='\n'
-
-#mty_r_oa
-
-node=ET.SubElement(workflow,'node')
-node.set('id','mty_r_oa')
-node.text='\n'
-node.tail='\n'
-
-ET.SubElement(node,'job').set('id','jt_o')
-
-sources=ET.SubElement(node,'sources')
-sources.text='\n'
-sources.tail='\n'
-
-#for y in myRange :
-#   for m in ('01','02','03','04','05','06','07','08','09','10','11','12') :
-#      source=ET.SubElement(sources,'source')
-#      source.set('refid','wf:node')
-#      source.text='node_t_'+str(y)+m
-#      source.tail='\n'
-#      if y == endYear and m == endMonth : break
-
-source=ET.SubElement(sources,'source')
-source.set('refid','wf:node')
-source.text='mty_m_ta'
-source.tail='\n'
-
-parameters=ET.SubElement(node,'parameters')
-parameters.text='\n'
-parameters.tail='\n'
-
-sPar(parameters,'iKey','mapcomic4(.*)(\.nc$)')
-sPar(parameters,'OutFile','out4.nc')
-sPar(parameters,'AttrStr','{"votemper": {"long_name": "average annual mean timeseries - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "average annual mean timeseries","institution": "MELODIES WP6 ACS INGV"}}')
-
+sPar(parameters,'iKey','\.nc$')
+sPar(parameters,'OutFile','out6.nc')
+sPar(parameters,'AttrStr','{"votemper": {"long_name": "average monthly mean timeseries - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "average monthly mean timeseries","institution": "MELODIES WP6 ACS INGV"}}')
 
 #ET.dump(application)
 print ET.tostring(application)
