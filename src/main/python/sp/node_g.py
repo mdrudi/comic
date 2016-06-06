@@ -7,27 +7,10 @@ mymr=mr.mr()
 
 # import the ciop functtons (e.g. copy, log)
 #sys.path.append('/usr/lib/ciop/python/')    #classic python, not anaconda
-import cioppy            #as ciop #classic python, not anaconda
-ciop = cioppy.Cioppy()   # anaconda
-
-#def GetLine(keyPattern=None) :
-#   import sys
-#   import re
-#   a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-#   while a != '' :
-#      #print "checking ",a[-3:]+'f'
-#      good=False
-#
-#      if keyPattern is None : good=True
-#      elif re.search(keyPattern,a) is not None : good=True
-#
-#      if good : return a
-#      print >>sys.stderr, "Dump ",a
-#      a=sys.stdin.readline().replace("\r","").replace("\n","").replace(" ","").replace("\t","")
-#
-#   return False
-
-
+try :
+   import cioppy            #as ciop #classic python, not anaconda
+   ciop = cioppy.Cioppy()   # anaconda
+except : pass
 
 lib=dict()
 
@@ -41,13 +24,16 @@ def GiveOutFile(myGroup,GroupRange,lib,Dump=False,key=None) :
       if Dump :
          print >>sys.stderr, "Dump "+os.getcwd()+'/'+out_file_name
       else :
+         print >>sys.stderr, "Publishing "+os.getcwd()+'/'+out_file_name
          try :
-            print >>sys.stderr, "Publishing output by ciop", out_file_name
+            print >>sys.stderr, "Publishing output by ciop "+os.getcwd()+'/'+out_file_name
             ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
-         except : print >>sys.stderr, "Issue to plublish by ciop"
+         except : print >>sys.stderr, "Issue to plublish by ciop "+os.getcwd()+'/'+out_file_name
          #print os.getcwd()+'/'+out_file_name
+         print >>sys.stderr, "Publishing output by mr module"
          if key is None : mymr.PushRecord(os.getcwd()+'/'+out_file_name)
-         else : mymr.PushRecord(os.getcwd()+'/'+out_file_name,(key,))
+         else : 
+            mymr.PushRecord(os.getcwd()+'/'+out_file_name,(key,))
          sys.stdout.flush()
 
 def UpdateList(InputPathFileName,myGroup,lib,GroupRange,oKey) :
@@ -97,8 +83,11 @@ def main():
       GroupRange=int(sys.argv[2]) # default 6
 #      GroupTag=sys.argv[3]
       oKey=sys.argv[3]
+
+   if iKey=='None' or iKey=='none' : iKey=None
+
    print >>sys.stderr, "iKey: ",iKey
-   print >>sys.stderr, "GroupRange (6->year_month,4->year,2->month):"+str(GroupRange)
+   print >>sys.stderr, "GroupRange (6->year_month,4->year,2->month,66->year_month without completeness check):"+str(GroupRange)
 #   print >>sys.stderr, "GroupTag: ",GroupTag
    print >>sys.stderr, "oKey: ",oKey
 
@@ -110,6 +99,8 @@ def main():
       InputFileName=os.path.basename(InputPathFileName)      
       if GroupRange==2 :
          myGroup=InputFileName[4:6] 
+      elif GroupRange==66 :
+         myGroup=InputFileName[0:6]
       else :
          myGroup=InputFileName[0:GroupRange]
          if GroupRange==6 and InputFileName[GroupRange:GroupRange+2]=='01' : 
@@ -127,24 +118,13 @@ def main():
 
       InputPathFileName=mymr.PullValue(iKey)
 
-
    #final closure and publication
    for myGroup in lib.keys() :
-      if GroupRange==2 :
+      if GroupRange==2 or GroupRange==66 :
          GiveOutFile(myGroup,GroupRange,lib,key=oKey)
       else :
          GiveOutFile(myGroup,GroupRange,lib,Dump=True)
-      #out_file_name=myGroup+"-mapcomic"+str(GroupRange)+".txt"
-      #out_file = open(out_file_name,"w")
-      #print >>sys.stderr, out_file_name
-      #for InputPathFileName in lib[myGroup] :
-      #   out_file.write(InputPathFileName+"\n")
-      #out_file.close()
-      #try : 
-      #   print >>sys.stderr, "Publishing by ciop", out_file_name
-      #   ciop.publish(os.environ['TMPDIR']+'/'+out_file_name)
-      #except : print >>sys.stderr, "Issue to plublish by ciop"
-      #print os.getcwd()+'/'+out_file_name
+
 
 if __name__ == "__main__":
    #import sp_bm
