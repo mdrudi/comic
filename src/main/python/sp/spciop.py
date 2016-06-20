@@ -110,11 +110,13 @@ def main():
    except : opt['s']=False
    try : opt['AttrStr']=CheckNone(ciop.getparam('AttrStr'))
    except : opt['AttrStr']=None
+   try : opt['OutField']=CheckNone(ciop.getparam('OutField'))
+   except : opt['OutField']=None
    opt['v']=False
 
    if opt['OutField'] is not None :
       print "WARNING : forcing the input variable"
-      opt['Var']=comic.processor.dict[opt.OutField][0]
+      opt['Var']=comic.processor.dict[opt['OutField']][0]
       print "WARNING : forcing the operation flags to ensure the correct behaviour"
       #opt.OutTRange=None
       opt['OutLayer']=None
@@ -178,7 +180,7 @@ def main():
       InputFileName=sp.GetLine(opt['bm'],keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
-            if len(opt['OutTRange'])==1 :
+            if opt['OutTRange'] is not None and len(opt['OutTRange'])==1 :
                if opt['OutTRange'][0]=='i6' : flagOutTRange=6
             while InputFileName :
                LocalInputFileName = GetInput(InputFileName)
