@@ -11,7 +11,20 @@ celltype_value=dict(daily_mean_map='daily_mean_map', monthly_mean_map='monthly_m
                     monthly_climatology_map='monthly_climatology_map', seasonal_climatology_timeseries='seasonal_climatology_timeseries', \
                     annual_climatology_map='annual_climatology_map', average_annual_mean_timeseries='average_annual_mean_timeseries')
 
-def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False,NoData=False) :  
+
+def exponent(input):
+    import numpy
+    exp = int(0)
+    while ((numpy.abs(input) > 0 and numpy.abs(input) < 1) or numpy.abs(input) > 10):
+        if numpy.abs(input) < 1:
+            input *= 10
+            exp -= 1
+        elif numpy.abs(input) > 10:
+            input /= 10
+            exp += 1
+    return exp
+
+def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False,NoData=False) :
    import netCDF4
    import numpy
    import os
@@ -27,6 +40,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       raise NameError('NoInputField')
 
    StandardName=getattr(MyDatasetVariable,'standard_name')
+
    #mv=getattr(MyDatasetVariable,'missing_value')
    #print 'mv',mv
 
@@ -177,7 +191,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
       dtTmp_bnds=netCDF4.num2date(MyDatasetTimeBnds[:,:],units=MyDatasetTime.units,calendar=MyDatasetTime.calendar)
       if isClimatology :
          TimeCells=numpy.rint(netCDF4.date2num(dtTmp_bnds,units='hours since 1900-01-01 00:00:00',calendar='standard'))
-      else : 
+      else :
          TimeCells=numpy.zeros((MyDatasetTime.size+1),dtype=numpy.int64)
          TimeCells[:TimeCells.size-1]=numpy.rint(netCDF4.date2num(dtTmp_bnds[:,0],units='hours since 1900-01-01 00:00:00',calendar='standard'))
          TimeCells[-1]=numpy.rint(netCDF4.date2num(dtTmp_bnds[-1,1],units='hours since 1900-01-01 00:00:00',calendar='standard'))
@@ -185,7 +199,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
 
    #print 'YYY',type(MyDatasetVariable),MyDatasetDepthLayer.size,MyDatasetVariable.shape
    if MyDatasetDepth is None :
-      ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,None,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)    
+      ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,None,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)
    else :
       ChTMP=sp_type.Characteristic(StandardName,MyInputVariable,MyDatasetDepthLayer,LonCells,LatCells,TimeCells,ConcatenatioOfSpatialMaps=MyDatasetVariable)
    if isClimatology : ChTMP.ClimatologicalField=True #setAsClimatologicalField()
@@ -216,6 +230,7 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    #print netCDF4.default_fillvals
    #OutDataset = netCDF4.Dataset('testout_nc4.nc', 'w') 
    print >>sys.stderr, 'WARNING 14 : to fix the target format and the criteria to handle the time'
+
    OutDataset = netCDF4.Dataset(OutFileName, 'w')
    #OutDataset = netCDF4.Dataset('testout_nc4c.nc', 'w', format='NETCDF4_CLASSIC')
    #OutDataset = netCDF4.Dataset('testout_nc3c.nc', 'w', format='NETCDF3_CLASSIC')  #ok checker http://puma.nerc.ac.uk/cgi-bin/cf-checker.pl
@@ -264,15 +279,26 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
       ldime=('time','depth','lat','lon')
    else :
       ldime=('time','lat','lon')
-   #OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
-   OutDataset.createVariable(cOut.VariableName,'f4',ldime,zlib=True,complevel=9,fill_value=Out.fill_value)
-   
 
-   tmpOutTemp=OutDataset.variables[cOut.VariableName]
+   OutMean = numpy.float32(Out.mean())
+   OutMeanExp = exponent(OutMean)
+   # print "Mean =", OutMean
+   # print "Mean exponent =", OutMeanExp
+   if OutMeanExp < 0:
+      OutLeastSignificantDigit = 2 - OutMeanExp
+   else:
+      OutLeastSignificantDigit = 2
+   # print "Least Significant Digit =", OutLeastSignificantDigit
+   Out = numpy.ma.around(Out, decimals=OutLeastSignificantDigit+1)
+
+   #OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)
+   OutDataset.createVariable(cOut.VariableName,'f4',ldime,zlib=True,complevel=9,least_significant_digit=OutLeastSignificantDigit,fill_value=Out.fill_value)
+
+   tmpOutTemp = OutDataset.variables[cOut.VariableName]
    #tmpOutTemp.coordinates="time depth lat lon"
    tmpOutTemp.standard_name=cOut.StandardName
-   tmpOutTemp.valid_min=numpy.float32(Out.min())
-   tmpOutTemp.valid_max=numpy.float32(Out.max())
+   tmpOutTemp.valid_min=numpy.around(numpy.float32(Out.min()), decimals=OutLeastSignificantDigit+1)
+   tmpOutTemp.valid_max=numpy.around(numpy.float32(Out.max()), decimals=OutLeastSignificantDigit+1)
    tmpOutTemp.missing_value=Out.fill_value
    tmpOutTemp.setncatts(cOut.AncillaryAttr)
 #for item in cOut.AncillaryAttr :
@@ -377,7 +403,7 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    tmpOutT.long_name='time'
    tmpOutT.standard_name='time'
    tmpOutT.axis='T'
-   if cOut.ClimatologicalField : 
+   if cOut.ClimatologicalField :
       tmpOutT.climatology="climatology_bnds"
       tmpOutT[:]=cOut.TimeCells[:,0] #+12
 #      print cOut.TimeCells.shape
@@ -398,7 +424,6 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    #tmpOutTB.standard_name='time'
 
    #print cOut.TimeCells[:]
-
    OutDataset.close()
 
 

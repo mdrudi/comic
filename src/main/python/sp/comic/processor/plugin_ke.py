@@ -2,15 +2,17 @@
 # Plugin to compute kinetic energy per unit volume from sea water speed variables
 # Revision by Paolo Oliveri, May 24, 2016
 from __future__ import print_function, division
+import sys
 import numpy as np
 import numpy.ma as ma
 from comic import type as sp_type
 from seaoverland import seaoverland
 from uvtotmask import uvtotmask
+
 # np.set_printoptions(threshold=np.nan)  # It slows debugging
 
 # Input - Output
-lout = 'kinetic_energy'
+lout = 'ke'
 lin = ('vozocrtx', 'vomecrty')
 
 # Common Constants
@@ -31,6 +33,8 @@ def processor(input_list):
     # Staggered grid check
     if not (np.array_equal(uLatCells, vLatCells) and np.array_equal(uLonCells, vLonCells)):
         staggered = True
+        print('WARNING 21 : Input ', lin,
+              ' grids are not equal. Treating them as components of a staggered C-grid.', file=sys.stderr)
     # Cut time dimension
     ucur = vozocrtx.COSM[0, ...]
     vcur = vomecrty.COSM[0, ...]

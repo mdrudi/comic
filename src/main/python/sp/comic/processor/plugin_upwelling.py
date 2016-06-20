@@ -2,6 +2,7 @@
 # Plugin to compute sea water upwelling speed from sea-air wind stress input variables
 # Revision by Paolo Oliveri, May 24, 2016
 from __future__ import print_function, division
+import sys
 import numpy as np
 import numpy.ma as ma
 from comic import type as sp_type
@@ -11,7 +12,7 @@ from uvtotmask import uvtotmask
 # np.set_printoptions(threshold=np.nan)  # It slows debugging
 
 # Input - Output
-lout = 'upwelling_speed'
+lout = 'upwelling'
 lin = ('sozotaux', 'sometauy')
 
 # Common Constants
@@ -96,7 +97,9 @@ def stagcurl(tau_lat, tau_lon, ulats, ulons, vlats, vlons):
 
 # Function calculating uwpwelling speed
 def upspeed(tau_curl, tau_lon, f):
-    up_speed = (beta0 * tau_lon) / (rho0 * (f ** 2)) + (tau_curl / (f * rho0))
+    up_speed_1 = (beta0 * tau_lon) / (rho0 * (f ** 2))
+    up_speed_2 = tau_curl / (f * rho0)
+    up_speed = up_speed_1 + up_speed_2
     return up_speed
 
 
@@ -114,6 +117,8 @@ def processor(input_list):
     # Staggered grid check
     if not (np.array_equal(uLatCells, vLatCells) and np.array_equal(uLonCells, vLonCells)):
         staggered = True
+        print('WARNING 21 : Input ', lin,
+              ' grids are not equal. Treating them as components of a staggered C-grid.', file=sys.stderr)
     # Replicate geometry 2D (to be updated with complete model geometry variables)
     if np.ndim(sozotaux.LatCells) == 1 and np.ndim(sozotaux.LonCells) == 1:
         uLatCells = np.transpose(np.tile(sozotaux.LatCells,

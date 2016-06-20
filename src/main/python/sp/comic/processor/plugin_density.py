@@ -40,12 +40,12 @@ def processor(input_list):
     # Compute Pressure 3D
     pressure = sw.pres(depths, lats)
     # Compute Potential Density field 3D
-    pot_density = ma.array(np.empty(shape=votemper.COSM.shape), mask=False, fill_value=1.e20, dtype=float)
-    pot_density[0, ...] = sw.dens(salt, temp, pressure)
+    density = ma.array(np.empty(shape=votemper.COSM.shape), mask=False, fill_value=1.e20, dtype=float)
+    density[0, ...] = sw.dens(salt, temp, pressure)
     # Attributes of Characteristic class are (StandardName,
     # VariableName, DepthLayers, LonCells, LatCells, TimeCells, ConcatenatioOfSpatialMaps, MaskedAs=None)
     potential_d = sp_type.Characteristic(StandardName='sea_water_density',
                                          VariableName='vodnsity', DepthLayers=votemper.DepthLayers,
                                          LonCells=votemper.LonCells, LatCells=votemper.LatCells,
-                                         TimeCells=votemper.TimeCells, ConcatenatioOfSpatialMaps=pot_density)
+                                         TimeCells=votemper.TimeCells, ConcatenatioOfSpatialMaps=density)
     return potential_d

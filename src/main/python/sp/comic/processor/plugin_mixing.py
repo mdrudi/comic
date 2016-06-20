@@ -13,7 +13,7 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 # Input - Output
-lout = 'vertical_diffusivity'
+lout = 'mixing'
 lin = ('votemper', 'vosaline')
 
 epsilon = 1.5e-9
@@ -46,7 +46,7 @@ def processor(input_list):
                                           DepthLayers[1: - 1, 1:, : - 1] + DepthLayers[1: - 1, : - 1, : - 1]))
     lats = 1 / 4 * (LatCells[1:, 1:] + LatCells[: - 1, 1:] +
                     LatCells[1:, : - 1] + LatCells[: - 1, : - 1])
-    print('WARNING 21 : not able to compute correctly vertical integrals, not available complete grid geometry '
+    print('WARNING 22 : not able to compute correctly vertical integrals, not available complete grid geometry '
                       'depth layers variable.', file=sys.stderr)
     # Cut Time Dimension
     temp = votemper.COSM[0, ...]
