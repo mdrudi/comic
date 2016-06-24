@@ -133,13 +133,14 @@ class sp :
                self.ListInApp[onePIFN]=ReadFile(InputFileName,onePIFN,self.LonMinMax,self.LatMinMax,self.OutputLayer,self.RemoveInput)
                if self.bm : sp_bm.bm_update(sp_bm.BM_READ,self.ListInApp[onePIFN].COSM)
                self.listPIFN.remove(onePIFN)
-               #print 'caricato ',onePIFN
             except Exception as e :
-               #print 'veriamo.......'
                if type(e) is NameError and e.args[0] == 'NoInputField' : continue
                else : raise
-         if self.bm : sp_bm.bm_update(sp_bm.BM_READ)
-         #raise NameError('NotPossibleYet')
+            if self.LonLat is not None : self.ListInApp[onePIFN].mask_out_of(self.LonLat)
+            if self.OutputLayer is not None or self.OutLonLat is not None :
+               self.ListInApp[onePIFN].operator_s(self.OutputLayer,self.OutLonLat)
+            if self.bm : sp_bm.bm_update(sp_bm.BM_COMPUTE)
+
 
 
    def loop_close(self) :

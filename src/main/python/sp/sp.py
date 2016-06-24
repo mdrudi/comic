@@ -242,7 +242,7 @@ def main():
       opt.Variables=comic.processor.dict[opt.OutField][0]
       print "WARNING : forcing the operation flags to ensure the correct behaviour"
       opt.OutTRange=None
-      opt.OutLayer=None
+      #opt.OutLayer=None
       opt.oao=None
    
    VSpaceAverage=(opt.OutLayer is not None) 
@@ -305,7 +305,7 @@ def main():
       InputFileName=GetLine(opt.bm,keyPattern)
       if InputFileName :
          if InputFileName[-4:]==".txt" :
-            if len(opt.OutTRange)==1 :
+            if opt.OutTRange is not None and len(opt.OutTRange)==1 :
                if opt.OutTRange[0]=='i6' : flagOutTRange=6
             while InputFileName :
                #one=True

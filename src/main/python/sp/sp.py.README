@@ -177,6 +177,10 @@ NB plugin available in jt_vto/comic/processor/
 
 ./jt_vto/sp.py --ifile list --bm --ofc density --ofile 198701-mapcomic6.txt.nc < in-198701-mapcomic6.txt
 
+NB possible specify layers and geobox
+
+./jt_vto/sp.py --ifile list --ofc=density --oav='[0,10,50,100,500,1000,2000]' --ilonlat='[  [[-6, 10 ], [34,45]] ]' --bm < ../inputfiles
+
 #in-198701-mapcomic6.txt
 
 [melodies-wp6@sb-10-15-27-13 arc]$ cat in-*

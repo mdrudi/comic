@@ -10,7 +10,7 @@ from comic import type as sp_type
 np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 # Input - Output
-lout = 'density'
+lout = 'vodnsity'    #density
 lin = ('votemper', 'vosaline')
 
 

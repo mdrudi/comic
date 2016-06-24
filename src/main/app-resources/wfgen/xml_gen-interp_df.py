@@ -69,7 +69,7 @@ defaultParameters.tail='\n'
 sPar(defaultParameters,'InFile','list')
 #sPar(defaultParameters,'iKey','')
 sPar(defaultParameters,'Var','votemper',title="Parameter",abstract="Parameter", scope="runtime")
-sPar(defaultParameters,'OutField','density',title="Parameter2",abstract="Parameter2", scope="runtime")
+sPar(defaultParameters,'OutField','vodnsity',title="Parameter2",abstract="Parameter2", scope="runtime")
 sPar(defaultParameters,'LonLat','',title="WorkingArea",abstract="default None", scope="runtime")
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
@@ -97,7 +97,7 @@ defaultParameters=ET.SubElement(jobTemplate,'defaultParameters')
 defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
-sPar(defaultParameters,'iKey','.nc$')
+sPar(defaultParameters,'iKey','.nc$|.gz$')
 sPar(defaultParameters,'oKey','None')
 
 defaultJobconf=ET.SubElement(jobTemplate,'defaultJobconf')

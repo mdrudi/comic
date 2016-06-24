@@ -119,7 +119,7 @@ def main():
       opt['Var']=comic.processor.dict[opt['OutField']][0]
       print "WARNING : forcing the operation flags to ensure the correct behaviour"
       #opt.OutTRange=None
-      opt['OutLayer']=None
+      #opt['OutLayer']=None
       opt['oao']=None
 
    VSpaceAverage=(opt['OutLayer'] is not None) 

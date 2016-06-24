@@ -12,7 +12,7 @@ from uvtotmask import uvtotmask
 # np.set_printoptions(threshold=np.nan)  # It slows debugging
 
 # Input - Output
-lout = 'ke'
+lout = 'vokenerg'   #kinetic energy
 lin = ('vozocrtx', 'vomecrty')
 
 # Common Constants

@@ -13,7 +13,7 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 # Input - Output
-lout = 'mixing'
+lout = 'votkeavt'   #Vertical diffusivity 
 lin = ('votemper', 'vosaline')
 
 epsilon = 1.5e-9
