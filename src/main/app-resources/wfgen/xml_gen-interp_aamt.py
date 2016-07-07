@@ -96,7 +96,7 @@ defaultParameters=ET.SubElement(jobTemplate,'defaultParameters')
 defaultParameters.text='\n'
 defaultParameters.tail='\n'
 
-sPar(defaultParameters,'iKey','.nc$')
+sPar(defaultParameters,'iKey','.nc$|.gz$')
 sPar(defaultParameters,'oKey','None')
 
 defaultJobconf=ET.SubElement(jobTemplate,'defaultJobconf')
@@ -128,8 +128,10 @@ sPar(defaultParameters,'InFile','list')
 sPar(defaultParameters,'iKey','\.txt$')
 #sPar(defaultParameters,'Var','votemper')
 sPar(defaultParameters,'Var','votemper',title="Parameter",abstract="Parameter", scope="runtime")
+sPar(defaultParameters,'LonLat','',title="WorkingArea",abstract="default None", scope="runtime")
 #sPar(defaultParameters,'LonLat','')
 sPar(defaultParameters,'OutFile','.out.nc')
+sPar(defaultParameters,'OutLayer','[0,10,50,100,500,1000,2000]',title="DepthLayers",abstract="default [0,10,50,100,500,1000,2000]",scope="runtime")
 sPar(defaultParameters,'oat','[]')
 #sPar(defaultParameters,'OutLayer','')
 #sPar(defaultParameters,'oao','')
