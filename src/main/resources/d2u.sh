@@ -1,3 +1,5 @@
+#echo user USERNAME > up
+#echo password PASSWORD >>up
 Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-sal-rean-dm"
 Dest="s3://melodies-wp6"
 
@@ -44,13 +46,13 @@ lul() {
 #   done
 
 #Source="ftp://gnoodap.bo.ingv.it/Core/MEDSEA_REANALYSIS_PHYS_006_004/myov05-med-ingv-cur-rean-dm"
-Source="ftp://cmems-med-mfc.eu/Core/MEDSEA_REANALYSIS_PHYS_006_004/cmemsv02-med-ingv-sal-rean-d"
+Source="ftp://cmems-med-mfc.eu/Core/MEDSEA_REANALYSIS_PHYS_006_004/cmemsv02-med-ingv-cur-rean-d"
 
-for tYYYY in 2014 ; do
+for tYYYY in 1987 ; do
    #tYYYY=2010
    sTot=$Source/yr$tYYYY
    tDir=$tYYYY
-   dDir=$Dest/${tYYYY}s/
+   dDir=$Dest/${tYYYY}c/
    lls $sTot/* | ldl $sTot $tDir | lul $dDir
    done
 

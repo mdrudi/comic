@@ -77,7 +77,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    if MyOutputLon is not None :
       MyOutputLonIndex=sp_type.FindIndex(MyDatasetLon[:],MyOutputLon[0],MyOutputLon[1])
       MyDatasetLon=MyDatasetLon[MyOutputLonIndex[0]:MyOutputLonIndex[1]]
-      MyDatasetLonBnds=MyDatasetLonBnds[MyOutputLonIndex[0]:MyOutputLonIndex[1],:]
+      if MyDatasetLonBnds is not None : MyDatasetLonBnds=MyDatasetLonBnds[MyOutputLonIndex[0]:MyOutputLonIndex[1],:]
    else :
       MyOutputLonIndex=(0,MyDatasetLon.size)
    if sp_glob.verbose : print >>sys.stderr, 'Lon Index :',MyOutputLonIndex
@@ -85,7 +85,7 @@ def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64M
    if MyOutputLat is not None :
       MyOutputLatIndex=sp_type.FindIndex(MyDatasetLat[:],MyOutputLat[0],MyOutputLat[1])
       MyDatasetLat=MyDatasetLat[MyOutputLatIndex[0]:MyOutputLatIndex[1]]
-      MyDatasetLatBnds=MyDatasetLatBnds[MyOutputLatIndex[0]:MyOutputLatIndex[1],:]
+      if MyDatasetLatBnds is not None : MyDatasetLatBnds=MyDatasetLatBnds[MyOutputLatIndex[0]:MyOutputLatIndex[1],:]
    else :
       MyOutputLatIndex=(0,MyDatasetLat.size)
    if sp_glob.verbose : print >>sys.stderr, 'Lat Index :',MyOutputLatIndex
