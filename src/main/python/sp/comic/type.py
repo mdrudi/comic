@@ -194,12 +194,21 @@ class Characteristic :
       OpeV=(OutDepth is not None)
       OpeO=(OutLonLat is not None)
       print >>sys.stderr, 'WARNING 16 : possible further improvement changing the computation flow'
+      # Change in operator_s to compute vertical mean (depth) ONLY in 3D fields (else the script will do nothing)
+      # Paolo Oliveri. October 5, 2016
       if OpeV :
-         self.COSM=ProcessorS(self.COSM,self.DepthLayers,OutDepth)
-         self.DepthLayers=OutDepth
+         if self.COSM.ndim == 4:
+             self.COSM=ProcessorS(self.COSM,self.DepthLayers,OutDepth)
+             self.DepthLayers=OutDepth
+      # Change in operator_s to correctly compute horizontal mean (lon and lat) in 2D or 3D fields
+      # Paolo Oliveri. October 5, 2016
       if OpeO :
-         self.COSM=numpy.ma.mean(self.COSM,axis=2)
-         self.COSM=numpy.ma.mean(self.COSM,axis=2)[:,:,numpy.newaxis,numpy.newaxis]
+         if self.COSM.ndim == 4:
+            self.COSM=numpy.ma.mean(self.COSM,axis=2)
+            self.COSM=numpy.ma.mean(self.COSM,axis=2)[:,:,numpy.newaxis,numpy.newaxis]
+         elif self.COSM.ndim == 3:
+            self.COSM=numpy.ma.mean(self.COSM,axis=1)
+            self.COSM=numpy.ma.mean(self.COSM,axis=1)[:,numpy.newaxis,numpy.newaxis]
          self.LonCells=numpy.array([ self.LonCells[0] , self.LonCells[self.LonCells.size-1] ])
          self.LatCells=numpy.array([ self.LatCells[0] , self.LatCells[self.LatCells.size-1] ])
 
@@ -217,11 +226,18 @@ class Characteristic :
          app=In.COSM
       else :
          app=ProcessorS(In.COSM,In.DepthLayers,self.DepthLayers)
-
-      if self.COSM.shape[2] == 1 : 
-         print >>sys.stderr, "WARNING 2 : weak test on orizontal consistency"
-         app=numpy.ma.mean(app,axis=2)
-         app=numpy.ma.mean(app,axis=2)[:,:,numpy.newaxis,numpy.newaxis]
+      # Change in operator_tAdd to correctly detect lon [-1] and lat [-2] coordinats in 2D or 3D fields
+      # Paolo Oliveri. October 5, 2016
+      if (self.COSM.shape[-1] == 1) and (self.COSM.shape[-2] == 1):
+         print >>sys.stderr, "WARNING 2 : weak test on horizontal consistency"
+         # Change in operator_tAdd to correctly compute horizontal mean (lon and lat) in 2D or 3D fields
+         # Paolo Oliveri. October 5, 2016
+         if app.ndim == 4:
+            app=numpy.ma.mean(app,axis=2)
+            app=numpy.ma.mean(app,axis=2)[:,:,numpy.newaxis,numpy.newaxis]
+         elif app.ndim == 3:
+            app = numpy.ma.mean(app, axis=1)
+            app = numpy.ma.mean(app, axis=1)[:, numpy.newaxis, numpy.newaxis]
          #print 'XXX',app.shape
 
       if TimeAverage :

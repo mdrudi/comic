@@ -12,6 +12,10 @@ celltype_value=dict(daily_mean_map='daily_mean_map', monthly_mean_map='monthly_m
                     annual_climatology_map='annual_climatology_map', average_annual_mean_timeseries='average_annual_mean_timeseries')
 
 
+# exponent function: given a real number x in any form (float, double, short or long integer), the function converts the
+# number in a new one, with the form of x = a * 10 ^ b, with a in range (-10, -1] or [1, 10) and b the integer exponent.
+# The function returns b (exp).
+# Paolo Oliveri, October 5, 2016
 def exponent(input):
     import numpy
     exp = int(0)
@@ -23,6 +27,30 @@ def exponent(input):
             input /= 10
             exp += 1
     return exp
+
+
+# least_significant_digit_function: given a numpy ndarray, the function calculates the mean and the variance and, with
+# the help of the exponent function, it calculates the relative exponents. Then, if the minimum of the two exponents is
+# lower than 0, it increases the default array precision (2 decimals) by the value (reversed) of the minimum exponent.
+# Paolo Oliveri, October 5, 2016
+def least_significant_digit(input):
+    import numpy
+    input_mean = numpy.float32(input.mean())
+    input_mean_exponent = exponent(input_mean)
+    input_variance = numpy.float32(numpy.abs(input.var()))
+    input_variance_exponent = exponent(input_variance)
+    # print "Mean =", Input_mean
+    # print "Mean exponent =", input_mean_exponent
+    # print "Variance =", input_variance
+    # print "Variance Exponent =", input_variance_exponent
+    minimum_exponent = numpy.min([input_mean_exponent, input_variance_exponent])
+    if minimum_exponent < 0:
+        OutLeastSignificantDigit = 2 - minimum_exponent
+    else:
+        OutLeastSignificantDigit = 2
+    # print "Least Significant Digit =", OutLeastSignificantDigit
+    return OutLeastSignificantDigit
+
 
 def ReadFile(MyInputFile,MyInputVariable,MyOutputLon=None,MyOutputLat=None,af64MyOutputLayer=None,RemoveInput=False,NoData=False) :
    import netCDF4
@@ -282,15 +310,9 @@ def WriteFile (cOut,OutFileName,AncillaryAttr=dict()) :   #Out,DepthLayer) :
    else :
       ldime=('time','lat','lon')
 
-   OutMean = numpy.float32(Out.mean())
-   OutMeanExp = exponent(OutMean)
-   # print "Mean =", OutMean
-   # print "Mean exponent =", OutMeanExp
-   if OutMeanExp < 0:
-      OutLeastSignificantDigit = 2 - OutMeanExp
-   else:
-      OutLeastSignificantDigit = 2
-   # print "Least Significant Digit =", OutLeastSignificantDigit
+   # Least Significant Digit calculus and Out array arounding
+   # Paolo Oliveri, October 5, 2016
+   OutLeastSignificantDigit = least_significant_digit(Out)
    Out = numpy.ma.around(Out, decimals=OutLeastSignificantDigit+1)
 
    #OutDataset.createVariable(cOut.VariableName,'f4',('time','depth','lat','lon'),zlib=True,complevel=9,least_significant_digit=2,fill_value=Out.fill_value)

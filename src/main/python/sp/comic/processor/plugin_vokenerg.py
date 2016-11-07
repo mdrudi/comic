@@ -12,7 +12,7 @@ from uvtotmask import uvtotmask
 # np.set_printoptions(threshold=np.nan)  # It slows debugging
 
 # Input - Output
-lout = 'vokenerg'   #kinetic energy
+lout = 'vokenerg'   # kinetic energy
 lin = ('vozocrtx', 'vomecrty')
 
 # Common Constants
@@ -51,14 +51,13 @@ def processor(input_list):
     #     vcur = ma.masked_where(tmask[0, ...], vcur)
     #     staggered = False
     # Compute kinetic energy field
-    ucurquad = ma.array(ucur, mask=ucur.mask, fill_value=1.e20, dtype=float)
-    vcurquad = ma.array(vcur, mask=vcur.mask, fill_value=1.e20, dtype=float)
-    kinetic_energy = ma.array(np.empty(shape=vozocrtx.COSM.shape), mask=True, fill_value=1.e20, dtype=float)
     if staggered:
         # Apply 1 point sea-over-land
         ucur = seaoverland(ucur)
         vcur = seaoverland(vcur)
         # Compute kinetic energy with T-grid transport
+        ucurquad = ma.array(np.empty(shape=ucur.shape), mask=True, fill_value=1.e20, dtype=float)
+        vcurquad = ma.array(np.empty(shape=vcur.shape), mask=True, fill_value=1.e20, dtype=float)
         ucurquad[:, 1:, 1:] = 1 / 2 * (ucur[:, 1:, 1:] ** 2 + ucur[:, 1:, : - 1] ** 2)
         vcurquad[:, 1:, 1:] = 1 / 2 * (vcur[:, 1:, 1:] ** 2 + vcur[:, : - 1, 1:] ** 2)
         # Place t-Grid recalculated mask
@@ -67,6 +66,7 @@ def processor(input_list):
         ucurquad = ucur ** 2
         vcurquad = vcur ** 2
         tmask = vozocrtx.COSM.mask
+    kinetic_energy = ma.array(np.empty(shape=vozocrtx.COSM.shape), mask=True, fill_value=1.e20, dtype=float)
     kinetic_energy[0, ...] = rho0 / 2 * (ucurquad + vcurquad)
     kinetic_energy = ma.masked_where(tmask, kinetic_energy)
     # Attributes of Characteristic class are (StandardName,

@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 # Plugin to compute sea water upwelling speed from sea-air wind stress input variables
-# Revision by Paolo Oliveri, May 24, 2016
+# Output will be in the corner f grid
+# Revision by Paolo Oliveri, Jul 22, 2016
 from __future__ import print_function, division
 import sys
 import numpy as np
 import numpy.ma as ma
 from comic import type as sp_type
 from seaoverland import seaoverland
-from uvtotmask import uvtotmask
+from uvtofmask import uvtofmask
+# from uvtotmask import uvtotmask
 
 # np.set_printoptions(threshold=np.nan)  # It slows debugging
 
 # Input - Output
-lout = 'voupwspe'   #upwelling speed
+lout = 'voupwspe'   # upwelling speed
 lin = ('sozotaux', 'sometauy')
 
 # Common Constants
-rho0 = 1035  # (kg/m^3) Water reference density (NEMO Book 3.4)
+rho0 = 1035  # (kg / m^3) Water reference density (NEMO Book 3.4)
 EarthRadius = 6.371e6  # Earth radius (m)
 deg_to_rad = np.pi / 180.0  # Sexagesimal - radiants conversion factor
 EarthOmega = 2 * np.pi / 86400  # Earth angle rotation (rad/s)
-# f0 = 2 * EarthOmega * np.sin(np.pi / 4)  # Zero order Coriolis parameter at middle latitudes (45 deg N)
-beta0 = 2 * EarthOmega * np.cos(np.pi / 4) / EarthRadius  # First order Coriolis parameter at middle latitudes (45 deg)
 
 
-# # Function to calculate distance from two points in spherical coordinates
+# Function to calculate distance from two points in spherical coordinates
 def distance(lat1, lon1, lat2, lon2):
     # sexagesimal - radiants conversion
     rdlat1 = lat1 * deg_to_rad
@@ -60,43 +60,31 @@ def curl(tau_lat, tau_lon, lats, lons):
     return taucurl
 
 
-# Function calculating vertical curl ( curl = dTy/dx - dTx/dy ) in native u, v grids
+# Function calculating vertical curl ( curl = dTy/dx - dTx/dy ) in native u, v grids. Output will be in corner f grid
 # Remember to apply one point SeaOverLand expansion on input fields before calculus
 def stagcurl(tau_lat, tau_lon, ulats, ulons, vlats, vlons):
     taucurl = ma.array(np.empty(shape=tau_lat.shape), mask=True, fill_value=1.e20, dtype=float)
     # Vector mode
-    dlat = distance(vlats[2:, 1: - 1], vlons[2:, 1: - 1], vlats[: - 2, 1: - 1], vlons[: - 2, 1: - 1])
-    dlon = distance(ulats[1: - 1, 2:], ulons[1: - 1, 2:], ulats[1: - 1, : - 2], ulons[1: - 1, : - 2])
-    dlat_previous = distance(vlats[2:, : - 2], vlons[2:, : - 2], vlats[: - 2, : - 2], vlons[: - 2, : - 2])
-    dlon_previous = distance(ulats[: - 2, 2:], ulons[: - 2, 2:], ulats[: - 2, : - 2], ulons[: - 2, : - 2])
-    d_lon_tau_lat = tau_lat[1: - 1, 2:] - tau_lat[1: - 1, : -2]
-    d_lon_tau_lat_previous = tau_lat[: - 2, 2:] - tau_lat[: - 2, : - 2]
-    d_lat_tau_lon = tau_lon[2:, 1: - 1] - tau_lon[: - 2, 1: - 1]
-    d_lat_tau_lon_previous = tau_lon[2:, : - 2] - tau_lon[: - 2, : - 2]
-    taucurl[1: - 1, 1: - 1] = 1 / (2 * EarthRadius) * ((d_lon_tau_lat / dlon +
-                                                        d_lon_tau_lat_previous / dlon_previous) -
-                                                       (d_lat_tau_lon / dlat +
-                                                        d_lat_tau_lon_previous / dlat_previous))
+    dlon = distance(ulats[:, 1:], ulons[:, 1:], ulats[:, : - 1], ulons[:, : - 1])
+    dlat = distance(vlats[1:, :], vlons[1:, :], vlats[: - 1, :], vlons[: - 1, :])
+    d_lon_tau_lat = tau_lat[:, 1:] - tau_lat[:, : -1]
+    d_lat_tau_lon = tau_lon[1:, :] - tau_lon[: - 1, :]
+    taucurl[: - 1, : - 1] = 1 / EarthRadius * (d_lon_tau_lat[: - 1, :] / dlon[: - 1, :] -
+                                               d_lat_tau_lon[:, : - 1] / dlat[:, : - 1])
     # Scalar mode (slow, leaved for vector code comprehension)
     # for lat in range(1, tau_lat.shape[0] - 1):
     #     for lon in range(1, tau_lat.shape[1] - 1):
-    #         taucurl[lat, lon] = 1 / (2 * EarthRadius) * (((tau_lat[lat, lon + 1] - tau_lat[lat, lon - 1]) /
-    #                                                      distance(ulats[lat, lon + 1], ulons[lat, lon + 1],
-    #                                                               ulats[lat, lon - 1], ulons[lat, lon - 1]) +
-    #                                                      (tau_lat[lat - 1, lon + 1] - tau_lat[lat - 1, lon - 1]) /
-    #                                                      distance(ulats[lat - 1, lon + 1], ulons[lat - 1, lon + 1],
-    #                                                               ulats[lat - 1, lon - 1], ulons[lat - 1, lon - 1])) -
-    #                                                      ((tau_lon[lat + 1, lon] - tau_lon[lat - 1, lon]) /
-    #                                                      distance(vlats[lat + 1, lon], vlons[lat + 1, lon],
-    #                                                               vlats[lat - 1, lon], vlons[lat - 1, lon]) +
-    #                                                      (tau_lon[lat + 1, lon - 1] - tau_lon[lat - 1, lon - 1]) /
-    #                                                      distance(vlats[lat + 1, lon - 1], vlons[lat + 1, lon - 1],
-    #                                                               vlats[lat - 1, lon - 1], vlons[lat - 1, lon - 1])))
+    #         taucurl[lat, lon] = 1 / EarthRadius * ((tau_lat[lat, lon + 1] - tau_lat[lat, lon]) /
+    #                                                distance(ulats[lat, lon + 1], ulons[lat, lon + 1],
+    #                                                         ulats[lat, lon], ulons[lat, lon]) -
+    #                                                (tau_lon[lat + 1, lon] - tau_lon[lat, lon]) /
+    #                                                distance(vlats[lat + 1, lon], vlons[lat + 1, lon],
+    #                                                         vlats[lat, lon], vlons[lat, lon]))
     return taucurl
 
 
 # Function calculating uwpwelling speed
-def upspeed(tau_curl, tau_lon, f):
+def upspeed(tau_curl, tau_lon, f, beta0):
     up_speed_1 = (beta0 * tau_lon) / (rho0 * (f ** 2))
     up_speed_2 = tau_curl / (f * rho0)
     up_speed = up_speed_1 + up_speed_2
@@ -141,17 +129,21 @@ def processor(input_list):
     # Cut time Dimension
     taux = sozotaux.COSM[0, ...]
     tauy = sometauy.COSM[0, ...]
-    # Compute Coriolis parameter
-    f = 2 * EarthOmega * np.sin(ulats * np.pi / 180)
-    # (1/s) Coriolis parameter (beta plane approximation)
-    # f2 = f0 + beta0 * EarthRadius * (ulats * np.pi / 180 - np.pi / 4)
+    # Compute mean basin latitude
+    lat0 = np.mean(vlats)
+    # Compute Coriolis parameter (beta plane approximation), remember to use staggered v latitudes
+    # Zero order Coriolis parameter at middle latitude
+    f0 = 2 * EarthOmega * np.sin(lat0 * deg_to_rad)
+    beta0 = 2 * EarthOmega * np.cos(lat0 * deg_to_rad) / EarthRadius  # First order Coriolis parameter at middle latitude
+    f = f0 + beta0 * EarthRadius * (vlats - lat0) * deg_to_rad
     # Apply 1 point sea-over-land
     taux = seaoverland(taux)
     tauy = seaoverland(tauy)
     # Transport variables to T-grid before calculi (more error)
     # if staggered:
-    #     taux[1:, 1:] = 1 / 2 * (taux[1:, 1:] + taux[1:, : - 1])
-    #     tauy[1:, 1:] = 1 / 2 * (tauy[1:, 1:] + tauy[: - 1, 1:])
+    #     print('Moving wind stress variables to t grid...', file=sys.stderr)
+    #     taux[:, 1:] = 1 / 2 * (taux[:, 1:] + taux[:, : - 1])
+    #     tauy[1:, :] = 1 / 2 * (tauy[1:, :] + tauy[: - 1, :])
     #     # Place t-Grid recalculated mask
     #     tmask = uvtotmask(sozotaux.COSM.mask, sometauy.COSM.mask)
     #     taux = ma.masked_where(tmask[0, ...], taux)
@@ -160,24 +152,25 @@ def processor(input_list):
     # Compute vertical curl
     if staggered:
         vertical_curl = stagcurl(tauy, taux, ulats, ulons, vlats, vlons)
-        # Load correct T mask from input fields
-        tmask = uvtotmask(sozotaux.COSM.mask, sometauy.COSM.mask)
-        # Shift taux to T-grid
-        ttaux = ma.array(taux, mask=taux.mask, fill_value=1.e20, dtype=float)
-        ttaux[:, 1:] = (taux[:, 1:] + taux[:, : -1]) / 2
-        ttaux = ma.masked_where(tmask[0, ...], ttaux)
+        # Load correct F mask from input fields
+        fmask = uvtofmask(sozotaux.COSM.mask, sometauy.COSM.mask)
+        # Shift taux to f-grid
+        ftaux = ma.array(taux, mask=taux.mask, fill_value=1.e20, dtype=float)
+        ftaux[:, : - 1] = (taux[:, 1:] + taux[:, : - 1]) / 2
+        ftaux = ma.masked_where(fmask[0, ...], ftaux)
     else:
         vertical_curl = curl(tauy, taux, ulats, vlons)
-        ttaux = taux
-        tmask = sozotaux.COSM.mask
+        ftaux = taux
+        fmask = sozotaux.COSM.mask
     # Compute upwelling speed and replace mask with the original one
     upwelling_speed = ma.array(np.empty(shape=sozotaux.COSM.shape), mask=False, fill_value=1.e20, dtype=float)
-    upwelling_speed[0, ...] = upspeed(vertical_curl, ttaux, f)
-    upwelling_speed = ma.masked_where(tmask, upwelling_speed)
+    # conversion from m/s to mm/s for vertical speeds
+    upwelling_speed[0, ...] = upspeed(vertical_curl, ftaux, f, beta0) * 1000
+    upwelling_speed = ma.masked_where(fmask, upwelling_speed)
     # Attributes of Characteristic class are (StandardName,
     # VariableName, DepthLayers, LonCells, LatCells, TimeCells, ConcatenatioOfSpatialMaps, MaskedAs=None)
     up_speed = sp_type.Characteristic(StandardName='upwelling_speed',
                                       VariableName='voupwspe', DepthLayers=None,
-                                      LonCells=sometauy.LonCells, LatCells=sozotaux.LatCells,
+                                      LonCells=sozotaux.LonCells, LatCells=sometauy.LatCells,
                                       TimeCells=sozotaux.TimeCells, ConcatenatioOfSpatialMaps=upwelling_speed)
     return up_speed

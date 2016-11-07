@@ -13,7 +13,7 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 # Input - Output
-lout = 'votkeavt'   #Vertical diffusivity 
+lout = 'votkeavt'   # Vertical diffusivity
 lin = ('votemper', 'vosaline')
 
 epsilon = 1.5e-9
@@ -51,9 +51,9 @@ def processor(input_list):
     # Cut Time Dimension
     temp = votemper.COSM[0, ...]
     salt = vosaline.COSM[0, ...]
-    # 100m depth cut (here we add 1 to depth cut because in the bfrq the z derivative component removes bottom depth)
+    # 200m depth cut (here we add 1 to depth cut because in the bfrq the z derivative component removes bottom depth)
     cutdepth = 0
-    while (depths[cutdepth, :, :] < 100).all():
+    while (depths[cutdepth, :, :] < 200).all():
         cutdepth += 1
     depths = depths[: cutdepth + 1, :, :]
     vertical_layers = vertical_layers[: cutdepth, :, :]

@@ -217,3 +217,155 @@ ANNUAL CLIMATOLOGY (Reduce ct)
 ./jt_vto/sp.py --ifile list --ifield=votemper --oac < inputfiles3
 
 
+COMPUTE MIXING INDICATOR (remember to have input files with high res depth layers)
+cat inputfiles4
+200001_mm-INGV--TEMP-MFS-MED_re.nc
+200001_mm-INGV--PSAL-MFS-MED_re.nc
+200002_mm-INGV--TEMP-MFS-MED_re.nc
+200002_mm-INGV--PSAL-MFS-MED_re.nc
+...
+200111_mm-INGV--TEMP-MFS-MED_re.nc
+200111_mm-INGV--PSAL-MFS-MED_re.nc
+200112_mm-INGV--TEMP-MFS-MED_re.nc
+200112_mm-INGV--PSAL-MFS-MED_re.nc
+
+1)  DERIVED FIELD node_g GROUP
+    ./jt_vto/node_g.py ".nc$" "66" "None" < inputfiles4
+
+    ls *mapcomic66*txt
+    200001-mapcomic66.txt
+    200002-mapcomic66.txt
+    ...
+    200111-mapcomic66.txt
+    200112-mapcomic66.txt
+
+    vi 200001-mapcomic66.txt
+    200001_mm-INGV--TEMP-MFS-MED_re.nc
+    200001_mm-INGV--PSAL-MFS-MED_re.nc
+
+2)  DERIVED FIELD COMPUTATION
+    ls $PWD/*mapcomic66.txt > inputfiles66.txt
+
+    AttrStr="{\"votkeavt\": {\"long_name\": \"Integrated Vertical Diffusivity\", \"units\": \"m2/s\"}, \"global\":{\"title\": \"monthly mean map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "\mapcomic66.txt$" --ifield votkeavt --iattrs "${AttrStr}" --ofc votkeavt --ofile .out.nc < inputfiles66.txt
+
+3)  THRESHOLD ON VOTKEAVT COMPUTATION
+    ls $PWD/*mapcomic66.txt.out.nc > inputfiles66.out.txt
+
+    # OPTIONAL
+    AttrStr="{\"thresholded_votkeavt\": {\"long_name\": \"Thresholded Integrated Vertical Diffusivity\", \"units\": \"dimensionless\"}, \"global\":{\"title\": \"monthly mean thresholded map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+
+    ./jt_vto/threshold.py ".nc$" "3e-06" "votkeavt" "${AttrStr}" < inputfiles66.out.txt
+
+4)  MONTHLY CLIMATOLOGY node_g GROUP
+    ls $PWD/*mapcomic66.txt.out_thresholded.nc > inputfiles66.out_thresholded.txt
+
+    ./jt_vto/node_g.py ".nc$" "2" "None" < inputfiles66.out_thresholded.txt
+
+    ls *mapcomic2*txt
+    01-mapcomic2.txt
+    ...
+    12-mapcomic2.txt
+
+    vi 01-mapcomic2.txt
+    200001-mapcomic66.txt.out_thresholded.nc
+    200101-mapcomic66.txt.out_thresholded.nc
+
+5)  MONTHLY CLIMATOLOGY COMPUTATION
+    ls $PWD/*mapcomic2.txt > inputfiles2.txt
+
+    AttrStr="{\"thresholded_votkeavt\": {\"long_name\": \"Thresholded Integrated Vertical Diffusivity\", \"units\": \"dimensionless\"}, \"global\":{\"title\": \"Thresholded monthly climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "\mapcomic2.txt$" --ifield thresholded_votkeavt --iattrs "${AttrStr}" --oac --ofile .out.nc --iClean < inputfiles2.txt
+
+6)  MIXING INDEX COMPUTATION
+    ls $PWD/*mapcomic2.txt.out.nc > inputfiles2.out.txt
+
+    # OPTIONAL
+    AttrStr="{\"mixing_index\": {\"long_name\": \"Mixing Index\", \"units\": \"dimensionless\"}, \"global\":{\"title\": \"monthly climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+
+    ./jt_vto/mixing_index.py ".nc$" "thresholded_votkeavt" "mixing_index" "${AttrStr}" < inputfiles2.out.txt
+
+7)  ANNUAL CLIMATOLOGY COMPUTATION
+    ls $PWD/*mapcomic2.txt.out_midx.nc > inputfiles2_midx.txt
+
+    AttrStr="{\"mixing_index\": {\"long_name\": \"Mixing Index\", \"units\": \"dimensionless\"}, \"global\":{\"title\": \"annual climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "mapcomic2(.*)(_midx\.nc$)" --ifield mixing_index --iattrs "${AttrStr}" --oac --ofile out_m_12_midx.nc < inputfiles2_midx.txt
+
+8) BASIN MEAN TIMESERIES COMPUTATION
+    ls $PWD/*mapcomic2.txt.out_midx.nc > inputfiles2_midx.txt
+
+    # OPTIONAL
+    AttrStr="{\"mixing_index\": {\"long_name\": \"Mixing Index\", \"units\": \"dimensionless\"}, \"global\":{\"title\": \"seasonal climatology timeseries\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "mapcomic2(.*)(_midx\.nc$)" --ifield mixing_index --iattrs "${AttrStr}" --oao --otc --ofile out_ts_12_midx.nc < inputfiles2_midx.txt
+
+COMPUTE UPWELLING INDICATOR
+cat inputfiles5
+200001_mm-INGV--TAUX-MED-MELODIES_re.nc
+200001_mm-INGV--TAUY-MED-MELODIES_re.nc
+200002_mm-INGV--TAUX-MED-MELODIES_re.nc
+200002_mm-INGV--TAUY-MED-MELODIES_re.nc
+...
+200111_mm-INGV--TAUX-MED-MELODIES_re.nc
+200111_mm-INGV--TAUY-MED-MELODIES_re.nc
+200112_mm-INGV--TAUX-MED-MELODIES_re.nc
+200112_mm-INGV--TAUY-MED-MELODIES_re.nc
+
+1)  DERIVED FIELD node_g GROUP
+    ./jt_vto/node_g.py ".nc$" "66" "None" < inputfiles5
+
+    ls *mapcomic66*txt
+    200001-mapcomic66.txt
+    200002-mapcomic66.txt
+    ...
+    200111-mapcomic66.txt
+    200112-mapcomic66.txt
+
+    vi 200001-mapcomic66.txt
+    200001_mm-INGV--TAUX-MFS-MED_re.nc
+    200001_mm-INGV--TAUY-MFS-MED_re.nc
+
+2)  DERIVED FIELD COMPUTATION
+    ls $PWD/*mapcomic66.txt > inputfiles66.txt
+
+    AttrStr="{\"voupwspe\": {\"long_name\": \"Ekman Upwelling Speed\", \"units\": \"mm/s\"}, \"global\":{\"title\": \"monthly mean map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+
+    ./jt_vto/sp.py --ifile list --bm --ikey "\mapcomic66.txt$" --ifield voupwspe --iattrs "${AttrStr}" --ofc voupwspe --ofile .out.nc --iClean < inputfiles66.txt
+
+3)  MONTHLY CLIMATOLOGY node_g GROUP
+    ls $PWD/*mapcomic66.txt.out.nc > inputfiles66.out.txt
+
+    ./jt_vto/node_g.py ".nc$" "2" "None" < inputfiles66.out.txt
+
+    ls *mapcomic2*txt
+    01-mapcomic2.txt
+    ...
+    12-mapcomic2.txt
+
+    vi 01-mapcomic2.txt
+    200001-mapcomic66.txt.out.nc
+    200101-mapcomic66.txt.out.nc
+
+5)  MONTHLY CLIMATOLOGY COMPUTATION
+    ls $PWD/*mapcomic2.txt > inputfiles2.txt
+
+    AttrStr="{\"voupwspe\": {\"long_name\": \"Ekman Upwelling Speed\", \"units\": \"mm/s\"}, \"global\":{\"title\": \"monthly climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "\mapcomic2.txt$" --ifield voupwspe --iattrs "${AttrStr}" --oac --ofile .out.nc --iClean < inputfiles2.txt
+
+6)  UPWELLING INDEX COMPUTATION
+    ls $PWD/*mapcomic2.txt.out.nc > inputfiles2.out.txt
+
+    # OPTIONAL
+    AttrStr="{\"upwelling_index\": {\"long_name\": \"Upwelling Index\", \"units\": \"sigma\"}, \"global\":{\"title\": \"monthly climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+
+    ./jt_vto/upwelling_index.py ".nc$" "0.00026082" "0.0023017" "voupwspe" "upwelling_index" "${AttrStr}" < inputfiles2.out.txt
+
+7)  ANNUAL CLIMATOLOGY COMPUTATION
+    ls $PWD/*mapcomic2.txt.out_uidx.nc > inputfiles2_uidx.txt
+
+    AttrStr="{\"upwelling_index\": {\"long_name\": \"Upwelling Index\", \"units\": \"sigma\"}, \"global\":{\"title\": \"annual climatology map\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "mapcomic2(.*)(_uidx\.nc$)" --ifield upwelling_index --iattrs "${AttrStr}" --oac --ofile out_m_12_uidx.nc < inputfiles2_uidx.txt
+
+8) BASIN MEAN TIMESERIES COMPUTATION
+    ls $PWD/*mapcomic2.txt.out_uidx.nc > inputfiles2_uidx.txt
+    AttrStr="{\"upwelling_index\": {\"long_name\": \"Upwelling Index\", \"units\": \"sigma\"}, \"global\":{\"title\": \"seasonal climatology timeseries\", \"source\": \"copernicus med mfc toolbox or RR Reanalysis\", \"institution\": \"MELODIES WP6 ACS INGV\"}}"
+    ./jt_vto/sp.py --ifile list --bm --ikey "mapcomic2(.*)(_uidx\.nc$)" --ifield upwelling_index --iattrs "${AttrStr}" --oao --otc --ofile out_ts_12_uidx.nc < inputfiles2_uidx.txt

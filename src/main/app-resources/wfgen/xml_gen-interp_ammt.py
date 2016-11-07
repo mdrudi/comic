@@ -290,7 +290,7 @@ parameters=ET.SubElement(node,'parameters')
 parameters.text='\n'
 parameters.tail='\n'
 
-sPar(parameters,'iKey','\.nc$')
+sPar(parameters,'iKey','\.nc$|.gz$')
 sPar(parameters,'OutFile','out6.nc')
 sPar(parameters,'AttrStr','{"votemper": {"long_name": "average monthly mean timeseries - temperature", "source": "copernicus med mfc toolbox"},"global":{"title": "average monthly mean timeseries","institution": "MELODIES WP6 ACS INGV"}}')
 
